@@ -1,0 +1,14 @@
+{
+  "name": "sidebitch",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "sanke aragoz",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "generate": "node index.js"
+  },
+  "dependencies": {
+    "buffer-replace": "^1.0.0"
+  }
+}

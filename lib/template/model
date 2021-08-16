@@ -1,0 +1,10 @@
+const { Model } = require("$$MODEL_SELECTION$$");
+
+class $$MODEL_NAME$$Model extends Model {
+  constructor() {
+    super();
+    this.tableName = "$$TABLE_NAME$$";
+  }
+}
+
+module.exports = new $$MODEL_NAME$$Model();
