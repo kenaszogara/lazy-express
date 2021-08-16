@@ -1,0 +1,11 @@
+const express = require("express");
+const router = express.Router();
+const { find, findById, create, update, del } = require("./../controllers/$$TABLE_NAME$$_controllers");
+
+router.get("/", find);
+router.get("/:id", findById);
+router.post("/", create);
+router.put("/:id", update);
+router.delete("/:id", del);
+
+module.exports = router;

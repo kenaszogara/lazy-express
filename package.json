@@ -9,6 +9,6 @@
     "generate": "node index.js"
   },
   "dependencies": {
-    "buffer-replace": "^1.0.0"
+    "express": "^4.17.1"
   }
 }

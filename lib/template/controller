@@ -1,0 +1,67 @@
+const $$MODEL_NAME$$Model = require("../models/$$TABLE_NAME$$_model");
+
+exports.find = async (req, res, next) => {
+  try {
+    const data = await $$MODEL_NAME$$Model.find();
+    console.log("$$TABLE_NAME$$ fetched");
+    res.send({ data: data });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+
+exports.findWhere = async (req, res, next) => {
+  try {
+    const data = await $$MODEL_NAME$$Model.findWhere(req.query);
+    console.log("$$TABLE_NAME$$ fetched");
+    res.send({ data: data });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+
+exports.findById = async (req, res, next) => {
+  try {
+    const data = await $$MODEL_NAME$$Model.findById(req.params.id);
+    console.log("$$TABLE_NAME$$ fetched");
+    res.send({ data: data });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+
+exports.create = async (req, res, next) => {
+  try {
+    const data = await $$MODEL_NAME$$Model.create(res.body);
+    console.log("$$TABLE_NAME$$ created");
+    res.send({ data: data });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+
+exports.update = async (req, res, next) => {
+  try {
+    const data = await $$MODEL_NAME$$Model.update(res.body, req.params.id);
+    console.log("$$TABLE_NAME$$ updated");
+    res.send({ data: data });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
+
+exports.delete = async (req, res, next) => {
+  try {
+    const data = await $$MODEL_NAME$$Model.delete(req.params.id);
+    console.log("$$TABLE_NAME$$ deleted");
+    res.send({ data: data });
+  } catch (error) {
+    console.log(error);
+    res.send(error);
+  }
+};
