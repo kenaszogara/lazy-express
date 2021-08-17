@@ -7,16 +7,11 @@
   "private": true,
   "scripts": {
     "start": "nodemon src/server.js",
-    "lazy": "node index.js"
+    "lazy": "node cli.js"
   },
-  "dependencies": {
-    "express": "^4.17.1",
-    "nodemon": "^2.0.12"
+  "bin": {
+    "lazy": "./cli.js"
   },
-  "devDependencies": {
-    "dotenv": "^10.0.0",
-    "mysql2": "^2.3.0",
-    "sequelize": "^6.6.5",
-    "sequelize-cli": "^6.2.0"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

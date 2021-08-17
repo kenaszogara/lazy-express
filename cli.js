@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 "use strict";
 
 const fs = require("fs");
@@ -8,11 +10,23 @@ const BASE_PATH = params[1];
 const PARAMS_1 = params[2];
 const PARAMS_2 = params[3];
 
-const CONFIG_FOLDER_DESTINATION = `${__dirname}/src/config`;
-const MODEL_FOLDER_DESTINATION = `${__dirname}/src/models`;
-const CONTROLLER_FOLDER_DESTINATION = `${__dirname}/src/controllers`;
-const ROUTE_FOLDER_DESTINATION = `${__dirname}/src/routes`;
-const MIGRATION_FOLDER_DESTINATION = `${__dirname}/src/migrations`;
+const CONFIG_FOLDER_DESTINATION = `${process.cwd()}/config`;
+const MODEL_FOLDER_DESTINATION = `${process.cwd()}/models`;
+const CONTROLLER_FOLDER_DESTINATION = `${process.cwd()}/controllers`;
+const ROUTE_FOLDER_DESTINATION = `${process.cwd()}/routes`;
+const MIGRATION_FOLDER_DESTINATION = `${process.cwd()}/migrations`;
+
+// template
+const MIGRATION_TEMPLATE = `${__dirname}/core/sequelize/template/migration.stub`;
+const MODEL_TEMPLATE = `${__dirname}/core/sequelize/template/model.stub`;
+const CONTROLLER_TEMPLATE = `${__dirname}/core/sequelize/template/controller.stub`;
+const ROUTE_TEMPLATE = `${__dirname}/core/sequelize/template/route.stub`;
+const CONFIG_TEMPLATE = `${__dirname}/core/sequelize/template/config.stub`;
+const MODEL_INDEX_TEMPLATE = `${__dirname}/core/sequelize/template/model_index.stub`;
+
+// manual
+const MANUAL_HELP = `${__dirname}/core/manual/help.stub`;
+const GENERATE_HELP = `${__dirname}/core/manual/generate/help.stub`;
 
 // console.log(params);
 
@@ -57,15 +71,17 @@ function main(c) {
 
   switch (command) {
     case COMMAND.HELP:
-      showHelp("./lib/manual/help");
+      showHelp(MANUAL_HELP);
       break;
 
     case COMMAND.INIT:
       initializeProject();
+      console.log("Project succesfully initialized");
       break;
 
     case COMMAND.GENERATE:
       checkConfig();
+      console.log(`Generating Model/Migration/Controller/Route: ${PARAMS_2}`);
       createSequelizeModel(PARAMS_2);
       createSequelizMigration(PARAMS_2);
       createSequelizeController(PARAMS_2);
@@ -87,7 +103,7 @@ function initializeProject() {
 
   // create config/config.json
   const targetConfig = `${CONFIG_FOLDER_DESTINATION}/config.json`;
-  const dataConfig = fs.readFileSync("./lib/sequelize/template/config", "utf8");
+  const dataConfig = fs.readFileSync(CONFIG_TEMPLATE, "utf8");
 
   if (!fs.existsSync(targetConfig)) {
     fs.writeFile(targetConfig, dataConfig, function (err) {
@@ -97,10 +113,7 @@ function initializeProject() {
 
   // create models/index.js
   const targetIndex = `${MODEL_FOLDER_DESTINATION}/index.js`;
-  const dataIndex = fs.readFileSync(
-    "./lib/sequelize/template/model_index",
-    "utf8"
-  );
+  const dataIndex = fs.readFileSync(MODEL_INDEX_TEMPLATE, "utf8");
 
   if (!fs.existsSync(targetIndex)) {
     fs.writeFile(targetIndex, dataIndex, function (err) {
@@ -112,7 +125,6 @@ function initializeProject() {
 function checkConfig() {
   // check config/config.json
   const target = `${CONFIG_FOLDER_DESTINATION}/config.json`;
-  // const dataConfig = fs.readFileSync("./lib/sequelize/template/config", "utf8");
 
   if (!fs.existsSync(target)) {
     throw Error(
@@ -148,10 +160,10 @@ function createMysqlModel(a) {
     const filename = `${tableName}_model.js`;
     const destination = `${MODEL_FOLDER_DESTINATION}/${filename}`;
 
-    const data = fs.readFileSync("./lib/template/model", "utf8");
+    const data = fs.readFileSync("./core/template/model", "utf8");
 
     // mysql_db_connection
-    // output = data.replace("$$MODEL_SELECTION$$", "./../../lib/mysql_model");
+    // output = data.replace("$$MODEL_SELECTION$$", "./../../core/mysql_model");
 
     // model_name
     output = output.replace("$$MODEL_NAME$$", modelName);
@@ -183,7 +195,7 @@ function createMysqlController(a) {
     const filename = `${tableName}_controller.js`;
     const destination = `${CONTROLLER_FOLDER_DESTINATION}/${filename}`;
 
-    const data = fs.readFileSync("./lib/template/controller", "utf8");
+    const data = fs.readFileSync("./core/template/controller", "utf8");
     output = data;
 
     // import model
@@ -223,7 +235,7 @@ function createMysqlRoute(a) {
     const filename = `${tableName}_route.js`;
     const destination = `${ROUTE_FOLDER_DESTINATION}/${filename}`;
 
-    const data = fs.readFileSync("./lib/template/route", "utf8");
+    const data = fs.readFileSync("./core/template/route", "utf8");
     output = data;
 
     // import model
@@ -274,7 +286,7 @@ function getModelOptions() {
     const option = MODEL_OPTIONS.LIST.includes(o) ? o : "";
     switch (option) {
       case MODEL_OPTIONS.HELP:
-        showHelp("./lib/manual/generate/help");
+        showHelp(GENERATE_HELP);
         break;
       default:
         break;
@@ -359,7 +371,7 @@ function getModelOptions() {
 
 function createModelIndex() {
   const target = `${MODEL_FOLDER_DESTINATION}/index.js`;
-  const data = fs.readFileSync("./lib/sequelize/template/model_index", "utf8");
+  const data = fs.readFileSync(MODEL_INDEX_TEMPLATE, "utf8");
 
   if (!fs.existsSync(target)) {
     fs.writeFile(target, data, function (err) {
@@ -379,7 +391,7 @@ function createSequelizeModel(a) {
     const filename = `${tableName}.js`;
     const destination = `${MODEL_FOLDER_DESTINATION}/${filename}`;
 
-    const data = fs.readFileSync("./lib/sequelize/template/model", "utf8");
+    const data = fs.readFileSync(MODEL_TEMPLATE, "utf8");
 
     output = data;
 
@@ -433,7 +445,7 @@ function createSequelizMigration(a) {
     const filename = `${date}-create-${tableName}.js`;
     const destination = `${MIGRATION_FOLDER_DESTINATION}/${filename}`;
 
-    const data = fs.readFileSync("./lib/sequelize/template/migration", "utf8");
+    const data = fs.readFileSync(MIGRATION_TEMPLATE, "utf8");
 
     output = data;
 
@@ -478,7 +490,7 @@ function createSequelizeController(a) {
     const filename = `${tableName}.js`;
     const destination = `${CONTROLLER_FOLDER_DESTINATION}/${filename}`;
 
-    const data = fs.readFileSync("./lib/sequelize/template/controller", "utf8");
+    const data = fs.readFileSync(CONTROLLER_TEMPLATE, "utf8");
     output = data;
 
     // import model
@@ -518,7 +530,7 @@ function createSequelizeRoute(a) {
     const filename = `${tableName}.js`;
     const destination = `${ROUTE_FOLDER_DESTINATION}/${filename}`;
 
-    const data = fs.readFileSync("./lib/sequelize/template/route", "utf8");
+    const data = fs.readFileSync(ROUTE_TEMPLATE, "utf8");
     output = data;
 
     // import model
