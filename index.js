@@ -3,7 +3,32 @@ const fs = require("fs");
 const params = process.argv;
 const BASE_PATH = params[1];
 const PARAMS_1 = params[2];
+
+const MODEL_FOLDER_DESTINATION = `${__dirname}/src/models`;
+const CONTROLLER_FOLDER_DESTINATION = `${__dirname}/src/controllers`;
+const ROUTE_FOLDER_DESTINATION = `${__dirname}/src/routes`;
+
 console.log(params);
+
+/**
+ * Generate options:
+ *  - default: create Controller, Model, Route for an API endpoint
+ *  - database: create Controller, Model, Route from all tablename in database
+ *  - model: create Model only
+ *  - controller: create Controller only
+ *  - route: create Route only
+ *  - (?) env option: choose between mysql or mongoose
+ *
+ * @param {-d} databaseName
+ * @param {-f} fields
+ * @param {-t} tableName
+ */
+
+function mkdirIfNotExist(target) {
+  if (!fs.existsSync(target)) {
+    fs.mkdirSync(target, { recursive: true });
+  }
+}
 
 function createModel(a) {
   if (a == undefined) return console.log("error");
@@ -13,7 +38,7 @@ function createModel(a) {
     const modelName = a.charAt(0).toUpperCase() + a.slice(1);
     const tableName = a.toLowerCase();
     const filename = `${tableName}_model.js`;
-    const destination = `${__dirname}/src/models/${filename}`;
+    const destination = `${MODEL_FOLDER_DESTINATION}/${filename}`;
 
     const data = fs.readFileSync("./lib/template/model", "utf8");
 
@@ -28,12 +53,13 @@ function createModel(a) {
     output = output.replace("$$TABLE_NAME$$", tableName);
 
     // write model file
+    mkdirIfNotExist(MODEL_FOLDER_DESTINATION);
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`src > models > ${filename}`);
     });
 
-    console.log(output);
+    // console.log(output);
   } catch (err) {
     console.error(err);
   }
@@ -47,7 +73,7 @@ function createController(a) {
     const modelName = a.charAt(0).toUpperCase() + a.slice(1);
     const tableName = a.toLowerCase();
     const filename = `${tableName}_controller.js`;
-    const destination = `${__dirname}/src/controllers/${filename}`;
+    const destination = `${CONTROLLER_FOLDER_DESTINATION}/${filename}`;
 
     const data = fs.readFileSync("./lib/template/controller", "utf8");
     output = data;
@@ -67,12 +93,13 @@ function createController(a) {
     }
 
     // write model file
+    mkdirIfNotExist(CONTROLLER_FOLDER_DESTINATION);
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`src > controllers > ${filename}`);
     });
 
-    console.log(output);
+    // console.log(output);
   } catch (err) {
     console.error(err);
   }
@@ -86,7 +113,7 @@ function createRoute(a) {
     const modelName = a.charAt(0).toUpperCase() + a.slice(1);
     const tableName = a.toLowerCase();
     const filename = `${tableName}_route.js`;
-    const destination = `${__dirname}/src/routes/${filename}`;
+    const destination = `${ROUTE_FOLDER_DESTINATION}/${filename}`;
 
     const data = fs.readFileSync("./lib/template/route", "utf8");
     output = data;
@@ -106,12 +133,13 @@ function createRoute(a) {
     }
 
     // write model file
+    mkdirIfNotExist(ROUTE_FOLDER_DESTINATION);
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`src > routes > ${filename}`);
     });
 
-    console.log(output);
+    // console.log(output);
   } catch (err) {
     console.error(err);
   }
