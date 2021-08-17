@@ -1,4 +1,4 @@
-# Lazy Code(MVC) Generator for Express JS
+# Vynl an MVC Generator for Express JS
 
 ## What's Inside
 
@@ -9,25 +9,25 @@ A generator / boilerplate for MVC project architecture for ExpressJS with Sequel
 Initialize project
 
 ```
-$ lazy init
+$ vynl init
 ```
 
 Then generate models
 
 ```
-$ lazy generate <model_name> -f <fields>
+$ vynl generate <model_name> -f <fields>
 ```
 
 ## Manual
 
 ```
-Lazy CLI
+Vynl CLI
 
 lazy [command]
 
 Commands:
-  lazy init                             Initializes project
-  lazy generate                         Run lazy generator
+  vynl init                             Initializes project
+  vynl generate                         Run vynl generator
 
 Options:
   --help      Show help
