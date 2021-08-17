@@ -17,7 +17,7 @@ const MIGRATION_FOLDER_DESTINATION = `${__dirname}/src/migrations`;
 // console.log(params);
 
 /**
- * Generate options:
+ * TODOS:
  *  [X] default: create Model, Migration, Controller, Route for an API endpoint
  *  [X] fields: get all fields
  *  - database: create Controller, Model, Route from all tablename in database
@@ -25,7 +25,10 @@ const MIGRATION_FOLDER_DESTINATION = `${__dirname}/src/migrations`;
  *  - migration: create Migration only
  *  - controller: create Controller only
  *  - route: create Route only
- *  [?] env option: choose between mysql or mongoose
+ *  - sync database: using migration files ??
+ *  [?] auto generate api documentation using swagger??
+ *  [?] scaffold view with simple crud table
+ *  [?] env option: choose between mysql or mongoose or sequelize
  *
  * @param {-d} databaseName
  * @param {-f} fields
