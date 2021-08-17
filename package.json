@@ -16,7 +16,6 @@
     "url": "https://github.com/kenaszogara/vynl/issues",
     "email": "kenaszogara@live.com"
   },
-  "private": true,
   "scripts": {
     "vynl": "node cli.js"
   },
