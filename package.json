@@ -1,16 +1,16 @@
 {
-  "name": "sidebitch",
+  "name": "vynl",
   "version": "0.0.1",
   "main": "index.js",
-  "author": "sanke aragoz",
+  "author": "aragozsanek",
   "license": "MIT",
   "private": true,
   "scripts": {
     "start": "nodemon src/server.js",
-    "lazy": "node cli.js"
+    "vynl": "node cli.js"
   },
   "bin": {
-    "lazy": "./cli.js"
+    "vynl": "./cli.js"
   },
   "dependencies": {},
   "devDependencies": {}
