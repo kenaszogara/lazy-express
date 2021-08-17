@@ -2,29 +2,20 @@
 
 ## What's Inside
 
-A generator / boilerplate for MVC project architecture using ExpressJS, Sequelize, and Sequelize-CLI
+A generator / boilerplate for MVC project architecture for ExpressJS with Sequelize
 
 ## How to use
+
 Initialize project
+
 ```
 $ lazy init
 ```
+
 Then generate models
+
 ```
 $ lazy generate <model_name> -f <fields>
-```
-
-## Installation
-With npm:
-
-```
-$ npm install
-```
-
-With yarn:
-
-```
-$ yarn install
 ```
 
 ## Manual
