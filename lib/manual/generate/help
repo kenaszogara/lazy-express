@@ -1,0 +1,10 @@
+Lazy CLI
+
+lazy generate [name] [flags]
+
+Flags:
+  -f                      Field input with format <name>:<sequelize.DataTypes> separated by ';' ex: name:string;age:integer 
+  -t                      Custom tableName option
+  
+Options:
+  --help                  Show this help  

@@ -1,0 +1,10 @@
+Lazy CLI
+
+lazy [command]
+
+Commands:
+  lazy init                             Initializes project
+  lazy generate                         Run lazy generator
+
+Options:
+  --help      Show help  
