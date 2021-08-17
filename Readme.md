@@ -1,21 +1,33 @@
 # Lazy Code(MVC) Generator for Express JS
 
-1. Install packages
+## What's Inside
 
-npm
+A generator / boilerplate for MVC project architecture using ExpressJS, Sequelize, and Sequelize-CLI
+
+## How to use
+Initialize project
+```
+$ lazy init
+```
+Then generate models
+```
+$ lazy generate <model_name> -f <fields>
+```
+
+## Installation
+With npm:
 
 ```
 $ npm install
 ```
 
-yarn
+With yarn:
 
 ```
 $ yarn install
 ```
 
-2. Create src, src/models, src/controllers, src/routes in project directory
-3. Generate all by running
+## Manual
 
 ```
 Lazy CLI
