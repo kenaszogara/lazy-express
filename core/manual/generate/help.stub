@@ -1,6 +1,6 @@
-Lazy CLI
+Vynl CLI
 
-lazy generate [name] [flags]
+vynl generate [name] [flags]
 
 Flags:
   -f                      Field input with format <name>:<sequelize.DataTypes> separated by ';' ex: name:string;age:integer 

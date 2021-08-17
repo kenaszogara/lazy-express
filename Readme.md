@@ -23,7 +23,7 @@ $ vynl generate <model_name> -f <fields>
 ```
 Vynl CLI
 
-lazy [command]
+vynl [command]
 
 Commands:
   vynl init                             Initializes project

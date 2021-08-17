@@ -6,7 +6,6 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "nodemon src/server.js",
     "vynl": "node cli.js"
   },
   "bin": {

@@ -1,10 +1,10 @@
-Lazy CLI
+Vynl CLI
 
-lazy [command]
+vynl [command]
 
 Commands:
-  lazy init                             Initializes project
-  lazy generate                         Run lazy generator
+  vynl init                             Initializes project
+  vynl generate                         Run vynl generator
 
 Options:
   --help      Show help  
