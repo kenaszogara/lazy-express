@@ -1,16 +1,26 @@
 {
   "name": "vynl",
   "version": "0.0.1",
+  "description": "VYNL a boilerplate generator for MVC project architecture using ExpressJS with Sequelize",
+  "keywords": [
+    "vynl"
+  ],
   "main": "index.js",
-  "author": "aragozsanek",
+  "author": "Kenas Zogara",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kenaszogara/vynl"
+  },
+  "bugs": {
+    "url": "https://github.com/kenaszogara/vynl/issues",
+    "email": "kenaszogara@live.com"
+  },
   "private": true,
   "scripts": {
     "vynl": "node cli.js"
   },
   "bin": {
     "vynl": "./cli.js"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+  }
 }

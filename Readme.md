@@ -21,7 +21,7 @@ $ vynl generate <model_name> -f <fields>
 ## Manual
 
 ```
-Vynl CLI
+VYNL CLI
 
 vynl [command]
 
