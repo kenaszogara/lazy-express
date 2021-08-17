@@ -18,14 +18,14 @@ const MIGRATION_FOLDER_DESTINATION = `${__dirname}/src/migrations`;
 
 /**
  * Generate options:
- *  - default: create Model, Migration, Controller, Route for an API endpoint
+ *  [X] default: create Model, Migration, Controller, Route for an API endpoint
+ *  [X] fields: get all fields
  *  - database: create Controller, Model, Route from all tablename in database
  *  - model: create Model only
- *  - fields: get all fields
  *  - migration: create Migration only
  *  - controller: create Controller only
  *  - route: create Route only
- *  - (?) env option: choose between mysql or mongoose
+ *  [?] env option: choose between mysql or mongoose
  *
  * @param {-d} databaseName
  * @param {-f} fields
@@ -49,7 +49,7 @@ const COMMAND = {
   GENERATE_ROUTE: "generate:route",
 };
 
-function getCommand(c) {
+function main(c) {
   const command = COMMAND.LIST.includes(c) ? c : "";
 
   switch (command) {
@@ -64,6 +64,7 @@ function getCommand(c) {
     case COMMAND.GENERATE:
       checkConfig();
       createSequelizeModel(PARAMS_2);
+      createSequelizMigration(PARAMS_2);
       createSequelizeController(PARAMS_2);
       createSequelizeRoute(PARAMS_2);
       break;
@@ -253,7 +254,6 @@ function createMysqlRoute(a) {
  * Generator with Sequelize
  *
  */
-
 const MODEL_OPTIONS = {
   LIST: ["--help", "-f", "-t"],
   HELP: "--help",
@@ -261,10 +261,12 @@ const MODEL_OPTIONS = {
   TABLE: "-t",
 };
 
-let FIELD_OPTION;
-let TABLE_OPTION;
+let MODEL_FIELD;
+let MIGRATION_FIELD;
+let TABLE_NAME;
 
 function getModelOptions() {
+  // show help
   params.forEach((o) => {
     const option = MODEL_OPTIONS.LIST.includes(o) ? o : "";
     switch (option) {
@@ -281,7 +283,8 @@ function getModelOptions() {
 
     switch (option) {
       case MODEL_OPTIONS.FIELD:
-        let data = "";
+        let modelField = "";
+        let migrationField = "";
         let n = "\n\t\t\t";
         let t = "\t\t\t";
         const fields = params[index + 1].toString().split(";");
@@ -292,45 +295,56 @@ function getModelOptions() {
           let name = item[0];
           let type = item[1];
           let dataType;
+          let seqType;
 
           switch (type) {
             case "string":
               dataType = "DataTypes.STRING";
+              seqType = "Sequelize.STRING";
               break;
 
             case "integer":
               dataType = "DataTypes.INTEGER";
+              seqType = "Sequelize.INTEGER";
               break;
 
             case "date":
               dataType = "DataTypes.DATE";
+              seqType = "Sequelize.DATE";
               break;
 
             case "uuid":
               dataType = "DataTypes.UUID";
+              seqType = "Sequelize.UUID";
               break;
 
             case "boolean":
               dataType = "DataTypes.BOOLEAN";
+              seqType = "Sequelize.BOOLEAN";
               break;
 
             default:
-              dataType = "DataTypes.STRING";
-              break;
+              throw Error("Missing datatype");
           }
 
           // concat
-          data == ""
-            ? (data = n + name + ": " + dataType + ",") // first line no tab
-            : (data = data + n + name + ": " + dataType + ","); // add tab after
+          modelField == ""
+            ? (modelField = n + name + ": " + dataType + ",") // first line no tab
+            : (modelField = modelField + n + name + ": " + dataType + ","); // add tab after
+
+          migrationField == ""
+            ? (migrationField = n + name + ": { type: " + seqType + " },") // first line no tab
+            : (migrationField =
+                migrationField + n + name + ": { type: " + seqType + " },");
         });
 
-        FIELD_OPTION = data;
+        MODEL_FIELD = modelField;
+        MIGRATION_FIELD = migrationField;
         break;
 
       case MODEL_OPTIONS.TABLE:
         const tableName = params[index + 1].toString();
-        TABLE_OPTION = tableName;
+        TABLE_NAME = tableName;
         break;
 
       default:
@@ -376,24 +390,72 @@ function createSequelizeModel(a) {
     // table_name
     output = output.replace(
       "$$TABLE_NAME$$",
-      TABLE_OPTION == undefined ? tableName : TABLE_OPTION
+      TABLE_NAME == undefined ? tableName : TABLE_NAME
     );
 
     // -f option (required)
-    if (FIELD_OPTION == undefined) {
+    if (MODEL_FIELD == undefined) {
       throw Error("field flag is required");
     }
-    output = output.replace("$$MODEL_FIELDS$$", FIELD_OPTION);
+    output = output.replace("$$MODEL_FIELDS$$", MODEL_FIELD);
 
     // -a option
     // output = output.replace("$$MODEL_ASSOCIATION$$", ASSOCITION_OPTION);
 
     // write model file
     mkdirIfNotExist(MODEL_FOLDER_DESTINATION);
-    createModelIndex();
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`Created: src > models > ${filename}`);
+    });
+
+    // console.log(output);
+  } catch (err) {
+    console.error(err);
+    exit();
+  }
+}
+
+function createSequelizMigration(a) {
+  if (a == undefined) throw Error("required variable name");
+
+  try {
+    let output = "";
+    const date = new Date()
+      .toISOString()
+      .split(".")[0]
+      .replace(/[^\d]/gi, "")
+      .toString();
+    const tableName = a.toLowerCase();
+    const filename = `${date}-create-${tableName}.js`;
+    const destination = `${MIGRATION_FOLDER_DESTINATION}/${filename}`;
+
+    const data = fs.readFileSync("./lib/sequelize/template/migration", "utf8");
+
+    output = data;
+
+    getModelOptions();
+
+    // table name
+    for (let i = 0; i < 2; i++) {
+      output = output.replace(
+        "$$TABLE_NAME$$",
+        TABLE_NAME == undefined ? tableName : TABLE_NAME
+      );
+    }
+
+    // -f option (required)
+    if (MIGRATION_FIELD == undefined) {
+      throw Error("field flag is required");
+    }
+
+    output = output.replace("$$MIGRATION_FIELD$$", MIGRATION_FIELD);
+
+    // write model file
+    mkdirIfNotExist(MIGRATION_FOLDER_DESTINATION);
+    fs.writeFile(destination, output, function (err) {
+      if (err) return console.log(err);
+      console.log(`Created: src > migrations > ${filename}`);
     });
 
     // console.log(output);
@@ -486,4 +548,4 @@ function createSequelizeRoute(a) {
 /**
  *  Start of main
  */
-getCommand(PARAMS_1);
+main(PARAMS_1);
