@@ -18,10 +18,7 @@ function createModel(a) {
     const data = fs.readFileSync("./lib/template/model", "utf8");
 
     // mysql_db_connection
-    output = data.replace(
-      "$$MODEL_SELECTION$$",
-      "./../lib/mysql_db_connection"
-    );
+    output = data.replace("$$MODEL_SELECTION$$", "./../../lib/mysql_model");
 
     // model_name
     output = output.replace("$$MODEL_NAME$$", modelName);
@@ -59,13 +56,13 @@ function createController(a) {
 
     // model_name
     // output = output.replace("$$MODEL_NAME$$", modelName);
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 7; i++) {
       output = output.replace("$$MODEL_NAME$$", modelName);
     }
 
     // table_name
     // output = output.replace("$$TABLE_NAME$$", tableName);
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 13; i++) {
       output = output.replace("$$TABLE_NAME$$", tableName);
     }
 

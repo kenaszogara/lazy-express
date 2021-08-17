@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { find, findById, create, update, del } = require("./../controllers/$$TABLE_NAME$$_controllers");
+const { find, findById, create, update, del } = require("./../controllers/$$TABLE_NAME$$_controller");
 
 router.get("/", find);
 router.get("/:id", findById);
