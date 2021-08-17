@@ -18,5 +18,14 @@ $ yarn install
 3. Generate all by running
 
 ```
-$ yarn generate <TABLE_NAME>
+Lazy CLI
+
+lazy [command]
+
+Commands:
+  lazy init                             Initializes project
+  lazy generate                         Run lazy generator
+
+Options:
+  --help      Show help
 ```
