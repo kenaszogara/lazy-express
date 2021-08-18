@@ -10,6 +10,7 @@ const BASE_PATH = params[1];
 const PARAMS_1 = params[2];
 const PARAMS_2 = params[3];
 
+// destination target
 const CONFIG_FOLDER_DESTINATION = `${process.cwd()}/config`;
 const MODEL_FOLDER_DESTINATION = `${process.cwd()}/models`;
 const CONTROLLER_FOLDER_DESTINATION = `${process.cwd()}/controllers`;
@@ -88,6 +89,21 @@ function main(c) {
       createSequelizeRoute(PARAMS_2);
       break;
 
+    case COMMAND.GENERATE_MODEL:
+      console.log(`Generating Model: ${PARAMS_2}`);
+      createSequelizeModel(PARAMS_2);
+      break;
+
+    case COMMAND.GENERATE_CONTROLLER:
+      console.log(`Generating Controller: ${PARAMS_2}`);
+      createSequelizeController(PARAMS_2);
+      break;
+
+    case COMMAND.GENERATE_ROUTE:
+      console.log(`Generating Route: ${PARAMS_2}`);
+      createSequelizeRoute(PARAMS_2);
+      break;
+
     default:
       throw Error("Unknown command");
   }
@@ -128,7 +144,7 @@ function checkConfig() {
 
   if (!fs.existsSync(target)) {
     throw Error(
-      "config.json not found. Please initialize project first by with command 'lazy init'"
+      "config.json not found. Please initialize project first by with command 'vynl init'"
     );
   }
 }
