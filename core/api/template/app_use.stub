@@ -1,0 +1,6 @@
+/**
+ *  Routes Declaration: import route from src/routes.js
+ *  and use it as you like here on line 14
+ */
+const apiRoutes = require("./routes");
+app.use("/api/v1", apiRoutes);

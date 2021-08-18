@@ -1,6 +1,6 @@
 "use strict";
 
-const { $$MODEL_NAME$$ } = require("../models/index");
+const { $$MODEL_NAME$$ } = require("../models");
 
 exports.findAll = async (req, res, next) => {
   try {

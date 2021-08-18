@@ -1,0 +1,29 @@
+"use strict";
+
+const express = require("express");
+const router = express.Router();
+const fs = require("fs");
+const path = require("path");
+
+/**
+ *  Routes Declaration: import all generated route from src/routes/*.js
+ *  and use it below as in ex: router.use("/<route_name>", <route_obj>)
+ *
+ *  the following route will be exposed to http://localhost:5000/api/v1/<route_name>
+ */
+
+// const usersRoute = require("./users");
+// router.use("/users", usersRoute);
+
+fs.readdirSync(__dirname)
+  .filter((file) => {
+    return (
+      file.indexOf(".") !== 0 && file !== "index.js" && file.slice(-3) === ".js"
+    );
+  })
+  .forEach((file) => {
+    const routes = require(path.join(__dirname, file));
+    router.use(`/${file.replace(".js", "")}`, routes);
+  });
+
+module.exports = router;
