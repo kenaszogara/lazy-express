@@ -1,7 +1,13 @@
 "use strict";
 
 /**
- * Swagger Documentation Setup
+ * Swagger Documentation Setup:
+ * in this file we compile our swagger documentaions in the docs/paths and docs/schemas
+ * along with our swaggerDefinition variable to create a complete swagger object that has
+ * all data needed for our documentation.
+ *
+ * if you want to see how the swaggger object looks like,
+ * put console.log({ ...swaggerDefinition, paths, schemas }) before module.exports
  */
 const port = process.env.PORT_PRODUCTION || 5000;
 const swaggerUi = require("swagger-ui-express");

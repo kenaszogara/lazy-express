@@ -60,6 +60,10 @@ const DATA_TYPES = {
   ARRAY: "array",
   OBJECT: "object",
   NUMBER: "number",
+  EMAIL: "email",
+  PASSWORD: "password",
+  FILE: "file",
+  ENUM: "enum",
 };
 
 const COMMAND = {
@@ -273,13 +277,14 @@ function showHelp(target) {
  * Generator Swagger
  */
 const SWAGGER_OPTIONS = {
-  LIST: ["--help", "-n", "-m", "-t", "-f", "-r"],
+  LIST: ["--help", "-n", "-m", "-t", "-f", "-r", "--force"],
   HELP: "--help",
   NAME: "-n",
   MODEL: "-m",
   FIELDS: "-f",
   TABLE: "-t",
   ROUTE: "-r",
+  FORCE: "--force",
 };
 
 let _SWAGGER_FILE_NAME;
@@ -287,6 +292,7 @@ let _SWAGGER_MODEL_NAME;
 let _SWAGGER_TABLE_NAME;
 let _SWAGGER_ROUTE_NAME;
 let _SWAGGER_FIELDS;
+let _SWAGGER_FORCE = false;
 
 function getSwaggerOptions() {
   // show help
@@ -323,6 +329,10 @@ function getSwaggerOptions() {
 
       case SWAGGER_OPTIONS.ROUTE:
         _SWAGGER_ROUTE_NAME = params[index + 1];
+        break;
+
+      case SWAGGER_OPTIONS.FORCE:
+        _SWAGGER_FORCE = true;
         break;
 
       default:
@@ -383,8 +393,8 @@ function generateSwaggerPaths(model, route = "", table = "", file = "") {
     const modelName = model.charAt(0).toUpperCase() + model.slice(1);
     const tableName = table != "" ? table : model.toLowerCase();
     const routeName = route != "" ? route : tableName;
-    const filename = file != "" ? file : tableName;
-    const destination = `${SWAGGER_DOC_PATHS_DESTINATION}/${filename}.js`;
+    const filename = file != "" ? file : `${modelName.toLowerCase()}.js`;
+    const destination = `${SWAGGER_DOC_PATHS_DESTINATION}/${filename}`;
 
     let data = fs.readFileSync(SWAGGER_DOC_PATHS_TEMPLATE, "utf8");
 
@@ -402,9 +412,13 @@ function generateSwaggerPaths(model, route = "", table = "", file = "") {
 
     // write model file
     mkdirIfNotExist(SWAGGER_DOC_PATHS_DESTINATION);
+
+    if (fs.existsSync(destination) && !_SWAGGER_FORCE)
+      throw Error("File already exists. To overwrite use --force");
+
     fs.writeFile(destination, data, function (err) {
       if (err) return console.log(err);
-      console.log(`Created: docs > paths > ${filename}.js`);
+      console.log(`Created: docs > paths > ${filename}`);
     });
   } catch (error) {
     console.log(error);
@@ -416,8 +430,8 @@ function generateSwaggerSchemas(model, fields, file = "") {
 
   try {
     const modelName = model.charAt(0).toUpperCase() + model.slice(1);
-    const filename = file != "" ? file : modelName.toLowerCase();
-    const destination = `${SWAGGER_DOC_SCHEMAS_DESTINATION}/${filename}.js`;
+    const filename = file != "" ? file : `${modelName.toLowerCase()}.js`;
+    const destination = `${SWAGGER_DOC_SCHEMAS_DESTINATION}/${filename}`;
 
     let data = fs.readFileSync(SWAGGER_DOC_SCHEMAS_TEMPLATE, "utf8");
 
@@ -431,22 +445,44 @@ function generateSwaggerSchemas(model, fields, file = "") {
       let name = field[0];
       let type = field[1];
       let dataTypes;
+      let format = "";
 
       switch (type) {
         case DATA_TYPES.INTEGER:
-          dataTypes = DATA_TYPES.INTEGER;
+          dataTypes = `type: "${DATA_TYPES.INTEGER}",`;
+          format = 'format: "int64",';
           break;
 
         case DATA_TYPES.STRING:
-          dataTypes = DATA_TYPES.STRING;
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
           break;
 
         case DATA_TYPES.DATE:
-          dataTypes = DATA_TYPES.DATE;
+          dataTypes = `type: "${DATA_TYPES.DATE}",`;
           break;
 
         case DATA_TYPES.BOOLEAN:
-          dataTypes = DATA_TYPES.BOOLEAN;
+          dataTypes = `type: "${DATA_TYPES.BOOLEAN}",`;
+          break;
+
+        case DATA_TYPES.EMAIL:
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          format = `format: "${DATA_TYPES.EMAIL}",`;
+          break;
+
+        case DATA_TYPES.PASSWORD:
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          format = `format: "${DATA_TYPES.PASSWORD}",`;
+          break;
+
+        case DATA_TYPES.FILE:
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          format = 'format: "byte",';
+          break;
+
+        case DATA_TYPES.FLOAT:
+          dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
+          format = `format: "${DATA_TYPES.FLOAT}",`;
           break;
 
         default:
@@ -454,18 +490,28 @@ function generateSwaggerSchemas(model, fields, file = "") {
       }
 
       schemaFieldsStr == ""
-        ? (schemaFields = "{ " + name + ": '" + dataTypes + "' }, \n")
-        : (schemaFields =
-            schemaFields + "\t\t\t{ " + name + ": '" + dataTypes + "' }, \n");
+        ? (schemaFieldsStr = name + ": { " + dataTypes + " " + format + " },")
+        : (schemaFieldsStr =
+            schemaFieldsStr +
+            "\n\t\t\t" +
+            name +
+            ": { " +
+            dataTypes +
+            " " +
+            format +
+            " },");
     });
 
     data = data.replace("$$SCHEMA_FIELDS$$", schemaFieldsStr);
 
     // write model file
     mkdirIfNotExist(SWAGGER_DOC_SCHEMAS_DESTINATION);
+    if (fs.existsSync(destination) && !_SWAGGER_FORCE)
+      throw Error("File already exists. To overwrite use --force");
+
     fs.writeFile(destination, data, function (err) {
       if (err) return console.log(err);
-      console.log(`Created: docs > schemas > ${filename}.js`);
+      console.log(`Created: docs > schemas > ${filename}`);
     });
   } catch (error) {
     console.log(error);

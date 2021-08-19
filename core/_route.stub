@@ -6,15 +6,20 @@ const fs = require("fs");
 const path = require("path");
 
 /**
- *  Routes Declaration: import all generated route from src/routes/*.js
- *  and use it below as in ex: router.use("/<route_name>", <route_obj>)
+ * Routes Declaration: The following function will import all generated route
+ * from src/routes/*.js and require them to be used with route.use(), with the
+ * file name as the name of the route.
  *
- *  the following route will be exposed to http://localhost:5000/api/v1/<route_name>
+ * If for instance you want to declare you own route then feel free to require them here
+ * and put it below as shown in example:
+ *
+ * ------------------------------------------------------
+ * const myUserRoute = require('./my_route_file');
+ * router.use('/my_route_name', myUserRoute);
+ * ------------------------------------------------------
+ *
+ * the above route will be exposed to http://localhost:5000/api/v1/<my_route_name>
  */
-
-// const usersRoute = require("./users");
-// router.use("/users", usersRoute);
-
 fs.readdirSync(__dirname)
   .filter((file) => {
     return (
