@@ -1,0 +1,170 @@
+"use strict";
+
+module.exports = {
+  "/$$ROUTE_NAME$$": {
+    get: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Get all users", // operation's desc.
+      operationId: "get$$MODEL_NAME$$", // unique operation id.
+      parameters: [], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ fetched", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ fetched",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    post: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Create users", // operation's desc.
+      operationId: "create$$MODEL_NAME$$", // unique operation id.
+      parameters: [], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ created", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ created",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/$$ROUTE_NAME$$/{:id}": {
+    get: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Get users by id", // operation's desc.
+      operationId: "get$$MODEL_NAME$$ById", // unique operation id.
+      parameters: [], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ fetched", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ fetched",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    put: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Update users by id", // operation's desc.
+      operationId: "update$$MODEL_NAME$$ById", // unique operation id.
+      parameters: [], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ updated", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ updated",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    delete: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Delete users by id", // operation's desc.
+      operationId: "deleteUsersById", // unique operation id.
+      parameters: [], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ deleted", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ deleted",
+                  },
+                  data: {
+                    type: "integer",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};

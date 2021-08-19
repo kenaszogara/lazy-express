@@ -1,0 +1,5 @@
+/**
+ * Swagger Doc Declaration
+ */
+const { swagerServe, swaggerSetup } = require("./swagger");
+app.use("/api-docs", swagerServe, swaggerSetup);

@@ -17,6 +17,10 @@ const CONTROLLER_FOLDER_DESTINATION = `${process.cwd()}/controllers`;
 const ROUTE_FOLDER_DESTINATION = `${process.cwd()}/routes`;
 const MIGRATION_FOLDER_DESTINATION = `${process.cwd()}/migrations`;
 
+const SWAGGER_DOC_FOLDER_DESTINATION = `${process.cwd()}/docs`;
+const SWAGGER_DOC_PATHS_DESTINATION = `${process.cwd()}/docs/paths`;
+const SWAGGER_DOC_SCHEMAS_DESTINATION = `${process.cwd()}/docs/schemas`;
+
 // template
 const MIGRATION_TEMPLATE = `${__dirname}/core/sequelize/template/migration.stub`;
 const MODEL_TEMPLATE = `${__dirname}/core/sequelize/template/model.stub`;
@@ -25,30 +29,42 @@ const ROUTE_TEMPLATE = `${__dirname}/core/sequelize/template/route.stub`;
 const CONFIG_TEMPLATE = `${__dirname}/core/sequelize/template/config.stub`;
 const MODEL_INDEX_TEMPLATE = `${__dirname}/core/sequelize/template/model_index.stub`;
 
+const _APP_TEMPLATE = `${__dirname}/core/_app.stub`;
+const _ROUTE_TEMPLATE = `${__dirname}/core/_route.stub`;
+const _SWAGGER_TEMPLATE = `${__dirname}/core/_swagger.stub`;
+const APP_USE_API_ROUTE_TEMPLATE = `${__dirname}/core/api/template/app_use.stub`;
+const APP_USE_SWAGGER_TEMPLATE = `${__dirname}/core/swagger/template/app_use.stub`;
+const SWAGGER_INDEX_TEMPLATE = `${__dirname}/core/swagger/template/doc_index.stub`;
+const SWAGGER_DOC_PATHS_TEMPLATE = `${__dirname}/core/swagger/template/doc_paths.stub`;
+const SWAGGER_DOC_SCHEMAS_TEMPLATE = `${__dirname}/core/swagger/template/doc_schemas.stub`;
+
 // manual
 const MANUAL_HELP = `${__dirname}/core/manual/help.stub`;
+const INIT_HELP = `${__dirname}/core/manual/help.stub`;
 const GENERATE_HELP = `${__dirname}/core/manual/generate/help.stub`;
+const GENERATE_SWAGGER_HELP = `${__dirname}/core/manual/generate/swagger/help.stub`;
 
 // console.log(params);
 
-/**
- * TODOS:
- *  [X] default: create Model, Migration, Controller, Route for an API endpoint
- *  [X] fields: get all fields
- *  - database: create Controller, Model, Route from all tablename in database
- *  - model: create Model only
- *  - migration: create Migration only
- *  - controller: create Controller only
- *  - route: create Route only
- *  - sync database: using migration files ??
- *  [?] auto generate api documentation using swagger??
- *  [?] scaffold view with simple crud table
- *  [?] env option: choose between mysql or mongoose or sequelize
- *
- * @param {-d} databaseName
- * @param {-f} fields
- * @param {-t} tableName
- */
+const DATA_TYPES = {
+  INTEGER: "integer",
+  STRING: "string",
+  TEXT: "text",
+  BOOLEAN: "boolean",
+  FLOAT: "float",
+  REAL: "real",
+  DECIMAL: "decimal",
+  JSON: "json",
+  UUID: "uuid",
+  DATE: "date",
+  ARRAY: "array",
+  OBJECT: "object",
+  NUMBER: "number",
+  EMAIL: "email",
+  PASSWORD: "password",
+  FILE: "file",
+  ENUM: "enum",
+};
 
 const COMMAND = {
   LIST: [
@@ -58,6 +74,7 @@ const COMMAND = {
     "generate:model",
     "generate:controller",
     "generate:route",
+    "generate:swagger",
   ],
   HELP: "--help",
   INIT: "init",
@@ -65,6 +82,7 @@ const COMMAND = {
   GENERATE_MODEL: "generate:model",
   GENERATE_CONTROLLER: "generate:controller",
   GENERATE_ROUTE: "generate:route",
+  GENERATE_SWAGGER: "generate:swagger",
 };
 
 function main(c) {
@@ -77,7 +95,6 @@ function main(c) {
 
     case COMMAND.INIT:
       initializeProject();
-      console.log("Project succesfully initialized");
       break;
 
     case COMMAND.GENERATE:
@@ -104,13 +121,97 @@ function main(c) {
       createSequelizeRoute(PARAMS_2);
       break;
 
+    case COMMAND.GENERATE_SWAGGER:
+      console.log(`Generating Swagger Docs:`);
+      getSwaggerOptions();
+      break;
+
     default:
-      throw Error("Unknown command");
+      console.log("ERROR: Unkown Command pls refer to --help");
+      showHelp(MANUAL_HELP);
+      exit();
   }
 }
 
+/**
+ * Init commands
+ */
+
+const INIT_OPTIONS = {
+  LIST: ["--help", "--no-swagger", "--no-route"],
+  HELP: "--help",
+  NO_SWAGGER: "--no-swagger",
+  NO_ROUTE: "--no-route",
+};
+
+let _NO_SWAGGER = false;
+let _NO_ROUTE = false;
+
+function getInitOptions() {
+  // show help
+  params.forEach((o) => {
+    const option = INIT_OPTIONS.LIST.includes(o) ? o : "";
+    switch (option) {
+      case INIT_OPTIONS.HELP:
+        showHelp(INIT_HELP);
+        break;
+      default:
+        break;
+    }
+  });
+
+  params.forEach((o, index) => {
+    const option = INIT_OPTIONS.LIST.includes(o) ? o : "";
+
+    switch (option) {
+      case INIT_OPTIONS.NO_SWAGGER:
+        _NO_SWAGGER = true;
+        break;
+
+      case INIT_OPTIONS.NO_ROUTE:
+        _NO_ROUTE = true;
+        break;
+
+      default:
+        // console.log("no options");
+        break;
+    }
+  });
+}
+
 function initializeProject() {
-  // creat folders: models, controllers, routes, config, migrations
+  getInitOptions();
+  console.log("Initializing project in current directory ... ");
+
+  // create app.js at directory
+  const appTarget = `${process.cwd()}/app.js`;
+  let appData = fs.readFileSync(_APP_TEMPLATE, "utf8");
+
+  _NO_ROUTE == true
+    ? (appData = appData.replace("$$API_ROUTE_APP_USE$$", ""))
+    : (appData = appData.replace(
+        "$$API_ROUTE_APP_USE$$",
+        fs.readFileSync(APP_USE_API_ROUTE_TEMPLATE, "utf8") + "\n"
+      ));
+
+  if (_NO_SWAGGER == true) {
+    appData = appData.replace("$$SWAGGER_APP_USE$$", "");
+  } else {
+    appData = appData.replace(
+      "$$SWAGGER_APP_USE$$",
+      fs.readFileSync(APP_USE_SWAGGER_TEMPLATE, "utf8") + "\n"
+    );
+    initializeSwagger();
+  }
+
+  if (!fs.existsSync(appTarget)) {
+    fs.writeFile(appTarget, appData, function (err) {
+      if (err) return console.log(err);
+      console.log('Express: Created app.js in "./"');
+    });
+  }
+
+  // create folders: models, controllers, routes, config, migrations
   mkdirIfNotExist(CONFIG_FOLDER_DESTINATION);
   mkdirIfNotExist(MODEL_FOLDER_DESTINATION);
   mkdirIfNotExist(CONTROLLER_FOLDER_DESTINATION);
@@ -120,20 +221,30 @@ function initializeProject() {
   // create config/config.json
   const targetConfig = `${CONFIG_FOLDER_DESTINATION}/config.json`;
   const dataConfig = fs.readFileSync(CONFIG_TEMPLATE, "utf8");
-
   if (!fs.existsSync(targetConfig)) {
     fs.writeFile(targetConfig, dataConfig, function (err) {
       if (err) return console.log(err);
+      console.log("Initialize project Config: config > config.json");
     });
   }
 
   // create models/index.js
   const targetIndex = `${MODEL_FOLDER_DESTINATION}/index.js`;
   const dataIndex = fs.readFileSync(MODEL_INDEX_TEMPLATE, "utf8");
-
   if (!fs.existsSync(targetIndex)) {
     fs.writeFile(targetIndex, dataIndex, function (err) {
       if (err) return console.log(err);
+      console.log("Initialize Models: models > index.js");
+    });
+  }
+
+  // create route/index.js
+  const routeIndex = `${ROUTE_FOLDER_DESTINATION}/index.js`;
+  const routeData = fs.readFileSync(_ROUTE_TEMPLATE, "utf8");
+  if (!fs.existsSync(routeIndex)) {
+    fs.writeFile(routeIndex, routeData, function (err) {
+      if (err) return console.log(err);
+      console.log("Initialize Route: routes > index.js");
     });
   }
 }
@@ -160,6 +271,251 @@ function showHelp(target) {
   const data = fs.readFileSync(target, "utf8");
   console.log(data);
   exit();
+}
+
+/**
+ * Generator Swagger
+ */
+const SWAGGER_OPTIONS = {
+  LIST: ["--help", "-n", "-m", "-t", "-f", "-r", "--force"],
+  HELP: "--help",
+  NAME: "-n",
+  MODEL: "-m",
+  FIELDS: "-f",
+  TABLE: "-t",
+  ROUTE: "-r",
+  FORCE: "--force",
+};
+
+let _SWAGGER_FILE_NAME;
+let _SWAGGER_MODEL_NAME;
+let _SWAGGER_TABLE_NAME;
+let _SWAGGER_ROUTE_NAME;
+let _SWAGGER_FIELDS;
+let _SWAGGER_FORCE = false;
+
+function getSwaggerOptions() {
+  // show help
+  params.forEach((o) => {
+    const option = SWAGGER_OPTIONS.LIST.includes(o) ? o : "";
+    switch (option) {
+      case SWAGGER_OPTIONS.HELP:
+        showHelp(GENERATE_SWAGGER_HELP);
+        break;
+      default:
+        break;
+    }
+  });
+
+  params.forEach((o, index) => {
+    const option = SWAGGER_OPTIONS.LIST.includes(o) ? o : "";
+
+    switch (option) {
+      case SWAGGER_OPTIONS.NAME:
+        _SWAGGER_FILE_NAME = params[index + 1];
+        break;
+
+      case SWAGGER_OPTIONS.MODEL:
+        _SWAGGER_MODEL_NAME = params[index + 1];
+        break;
+
+      case SWAGGER_OPTIONS.FIELDS:
+        _SWAGGER_FIELDS = params[index + 1];
+        break;
+
+      case SWAGGER_OPTIONS.TABLE:
+        _SWAGGER_TABLE_NAME = params[index + 1];
+        break;
+
+      case SWAGGER_OPTIONS.ROUTE:
+        _SWAGGER_ROUTE_NAME = params[index + 1];
+        break;
+
+      case SWAGGER_OPTIONS.FORCE:
+        _SWAGGER_FORCE = true;
+        break;
+
+      default:
+        break;
+    }
+  });
+
+  if (_SWAGGER_MODEL_NAME === undefined) throw Error("model name is a must");
+  if (_SWAGGER_FIELDS === undefined) throw Error("fields is a must");
+
+  const route = _SWAGGER_ROUTE_NAME != undefined ? _SWAGGER_ROUTE_NAME : "";
+  const table = _SWAGGER_TABLE_NAME != undefined ? _SWAGGER_TABLE_NAME : "";
+  const file = _SWAGGER_FILE_NAME != undefined ? _SWAGGER_FILE_NAME : "";
+
+  generateSwaggerPaths(_SWAGGER_MODEL_NAME, route, table, file);
+  generateSwaggerSchemas(_SWAGGER_MODEL_NAME, _SWAGGER_FIELDS, file);
+}
+
+function initializeSwagger() {
+  console.log("Initializing Swagger ...");
+  // create swagger.js in project dir
+  const swaggerTarget = `${process.cwd()}/swagger.js`;
+  const swaggerData = fs.readFileSync(_SWAGGER_TEMPLATE, "utf8");
+  if (!fs.existsSync(swaggerTarget)) {
+    fs.writeFile(swaggerTarget, swaggerData, function (err) {
+      if (err) return console.log(err);
+    });
+  }
+
+  // create docs docs/paths and docs/schemas
+  // mkdirIfNotExist(SWAGGER_DOC_FOLDER_DESTINATION);
+  mkdirIfNotExist(SWAGGER_DOC_PATHS_DESTINATION);
+  mkdirIfNotExist(SWAGGER_DOC_SCHEMAS_DESTINATION);
+
+  const data = fs.readFileSync(SWAGGER_INDEX_TEMPLATE, "utf8");
+
+  // create docs/paths/index.js
+  const pathsTarget = `${SWAGGER_DOC_PATHS_DESTINATION}/index.js`;
+  if (!fs.existsSync(pathsTarget)) {
+    fs.writeFile(pathsTarget, data, function (err) {
+      if (err) return console.log(err);
+    });
+  }
+
+  // create docs/schemas/index.js
+  const schemasTarget = `${SWAGGER_DOC_SCHEMAS_DESTINATION}/index.js`;
+  if (!fs.existsSync(schemasTarget)) {
+    fs.writeFile(schemasTarget, data, function (err) {
+      if (err) return console.log(err);
+    });
+  }
+}
+
+function generateSwaggerPaths(model, route = "", table = "", file = "") {
+  if (model === undefined) return console.log("error");
+
+  try {
+    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
+    const tableName = table != "" ? table : model.toLowerCase();
+    const routeName = route != "" ? route : tableName;
+    const filename = file != "" ? file : `${modelName.toLowerCase()}.js`;
+    const destination = `${SWAGGER_DOC_PATHS_DESTINATION}/${filename}`;
+
+    let data = fs.readFileSync(SWAGGER_DOC_PATHS_TEMPLATE, "utf8");
+
+    for (let i = 0; i < 2; i++) {
+      data = data.replace("$$ROUTE_NAME$$", routeName);
+    }
+
+    for (let i = 0; i < 18; i++) {
+      data = data.replace("$$MODEL_NAME$$", modelName);
+    }
+
+    for (let i = 0; i < 5; i++) {
+      data = data.replace("$$TABLE_NAME$$", tableName);
+    }
+
+    // write model file
+    mkdirIfNotExist(SWAGGER_DOC_PATHS_DESTINATION);
+
+    if (fs.existsSync(destination) && !_SWAGGER_FORCE)
+      throw Error("File already exists. To overwrite use --force");
+
+    fs.writeFile(destination, data, function (err) {
+      if (err) return console.log(err);
+      console.log(`Created: docs > paths > ${filename}`);
+    });
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+function generateSwaggerSchemas(model, fields, file = "") {
+  if (model === undefined) return console.log("error");
+
+  try {
+    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
+    const filename = file != "" ? file : `${modelName.toLowerCase()}.js`;
+    const destination = `${SWAGGER_DOC_SCHEMAS_DESTINATION}/${filename}`;
+
+    let data = fs.readFileSync(SWAGGER_DOC_SCHEMAS_TEMPLATE, "utf8");
+
+    data = data.replace("$$MODEL_NAME$$", modelName);
+
+    let schemaFieldsStr = "";
+    let schemaFields = fields.split(",");
+
+    schemaFields.forEach((item, index) => {
+      let field = item.split(":");
+      let name = field[0];
+      let type = field[1];
+      let dataTypes;
+      let format = "";
+
+      switch (type) {
+        case DATA_TYPES.INTEGER:
+          dataTypes = `type: "${DATA_TYPES.INTEGER}",`;
+          format = 'format: "int64",';
+          break;
+
+        case DATA_TYPES.STRING:
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          break;
+
+        case DATA_TYPES.DATE:
+          dataTypes = `type: "${DATA_TYPES.DATE}",`;
+          break;
+
+        case DATA_TYPES.BOOLEAN:
+          dataTypes = `type: "${DATA_TYPES.BOOLEAN}",`;
+          break;
+
+        case DATA_TYPES.EMAIL:
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          format = `format: "${DATA_TYPES.EMAIL}",`;
+          break;
+
+        case DATA_TYPES.PASSWORD:
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          format = `format: "${DATA_TYPES.PASSWORD}",`;
+          break;
+
+        case DATA_TYPES.FILE:
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          format = 'format: "byte",';
+          break;
+
+        case DATA_TYPES.FLOAT:
+          dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
+          format = `format: "${DATA_TYPES.FLOAT}",`;
+          break;
+
+        default:
+          throw Error("Invalid data types");
+      }
+
+      schemaFieldsStr == ""
+        ? (schemaFieldsStr = name + ": { " + dataTypes + " " + format + " },")
+        : (schemaFieldsStr =
+            schemaFieldsStr +
+            "\n\t\t\t" +
+            name +
+            ": { " +
+            dataTypes +
+            " " +
+            format +
+            " },");
+    });
+
+    data = data.replace("$$SCHEMA_FIELDS$$", schemaFieldsStr);
+
+    // write model file
+    mkdirIfNotExist(SWAGGER_DOC_SCHEMAS_DESTINATION);
+    if (fs.existsSync(destination) && !_SWAGGER_FORCE)
+      throw Error("File already exists. To overwrite use --force");
+
+    fs.writeFile(destination, data, function (err) {
+      if (err) return console.log(err);
+      console.log(`Created: docs > schemas > ${filename}`);
+    });
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 /**
@@ -316,9 +672,7 @@ function getModelOptions() {
       case MODEL_OPTIONS.FIELD:
         let modelField = "";
         let migrationField = "";
-        let n = "\n\t\t\t";
-        let t = "\t\t\t";
-        const fields = params[index + 1].toString().split(";");
+        const fields = params[index + 1].toString().split(",");
         // ["name:string", "number:integer", "date:date", "uuid:uuid", "boolean:boolean"]
 
         fields.forEach((field) => {
@@ -329,27 +683,27 @@ function getModelOptions() {
           let seqType;
 
           switch (type) {
-            case "string":
+            case DATA_TYPES.STRING:
               dataType = "DataTypes.STRING";
               seqType = "Sequelize.STRING";
               break;
 
-            case "integer":
+            case DATA_TYPES.INTEGER:
               dataType = "DataTypes.INTEGER";
               seqType = "Sequelize.INTEGER";
               break;
 
-            case "date":
+            case DATA_TYPES.DATE:
               dataType = "DataTypes.DATE";
               seqType = "Sequelize.DATE";
               break;
 
-            case "uuid":
+            case DATA_TYPES.UUID:
               dataType = "DataTypes.UUID";
               seqType = "Sequelize.UUID";
               break;
 
-            case "boolean":
+            case DATA_TYPES.BOOLEAN:
               dataType = "DataTypes.BOOLEAN";
               seqType = "Sequelize.BOOLEAN";
               break;
@@ -360,13 +714,19 @@ function getModelOptions() {
 
           // concat
           modelField == ""
-            ? (modelField = n + name + ": " + dataType + ",") // first line no tab
-            : (modelField = modelField + n + name + ": " + dataType + ","); // add tab after
+            ? (modelField = name + ": " + dataType + ", \n")
+            : (modelField =
+                modelField + "\t\t\t" + name + ": " + dataType + ", \n");
 
           migrationField == ""
-            ? (migrationField = n + name + ": { type: " + seqType + " },") // first line no tab
+            ? (migrationField = name + ": { type: " + seqType + " }, \n")
             : (migrationField =
-                migrationField + n + name + ": { type: " + seqType + " },");
+                migrationField +
+                "\t\t\t" +
+                name +
+                ": { type: " +
+                seqType +
+                " }, \n");
         });
 
         MODEL_FIELD = modelField;
@@ -578,5 +938,6 @@ function createSequelizeRoute(a) {
 
 /**
  *  Start of main
+ *
  */
 main(PARAMS_1);

@@ -1,0 +1,15 @@
+VYNL CLI
+
+vynl generate:swagger -m [model name] -f [schema fields] 
+
+Required
+  -m                      Model name for the Schema and Paths Tags
+  -f                      Schema fields ex: <name>:<types>
+
+Flags:
+  -n                      Optional filename for both Schema and Path if not set will use modelName.toLower() as tablename 
+  -t                      Optional tablename. if not set will use modelName.toLower() as tablename 
+  -r                      Optional route name. If not set will use modelName.toLower() as route name
+
+Options:
+  --help                  Show this help  
