@@ -1,0 +1,22 @@
+"use strict";
+
+module.exports = {
+  $$MODEL_NAME$$: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+      },
+      $$SCHEMA_FIELDS$$
+      created_at: {
+        type: "string",
+        format: "date-time",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+      },
+    },
+  },
+};
