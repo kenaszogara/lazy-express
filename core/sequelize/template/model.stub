@@ -15,8 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
 
   $$MODEL_NAME$$.init(
-    {
-      $$MODEL_FIELDS$$
+    {$$MODEL_FIELDS$$
     },
     {
       sequelize,

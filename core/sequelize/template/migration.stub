@@ -8,8 +8,7 @@ module.exports = {
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER,
-      },
-      $$MIGRATION_FIELD$$
+      },$$MIGRATION_FIELD$$
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

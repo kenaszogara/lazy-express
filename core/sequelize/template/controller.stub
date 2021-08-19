@@ -1,10 +1,12 @@
 "use strict";
 
-const { $$MODEL_NAME$$ } = require("../models");
+const { DataTypes } = require("sequelize");
+const { sequelize } = require("../models/index");
+const $$MODEL_NAME$$ = require("../models/$$TABLE_NAME$$");
 
 exports.findAll = async (req, res, next) => {
   try {
-    const data = await $$MODEL_NAME$$.findAll();
+    const data = await $$MODEL_NAME$$(sequelize, DataTypes).findAll();
     console.log("$$TABLE_NAME$$ fetched");
     res.send({ msg: "$$TABLE_NAME$$ fetched", data: data });
   } catch (error) {
@@ -15,7 +17,7 @@ exports.findAll = async (req, res, next) => {
 
 exports.findWhere = async (req, res, next) => {
   try {
-    const data = await $$MODEL_NAME$$.findWhere({
+    const data = await $$MODEL_NAME$$(sequelize, DataTypes).findWhere({
       where: req.query,
     });
     console.log("$$TABLE_NAME$$ fetched");
@@ -28,7 +30,7 @@ exports.findWhere = async (req, res, next) => {
 
 exports.findById = async (req, res, next) => {
   try {
-    const data = await $$MODEL_NAME$$.findByPk(req.params.id);
+    const data = await $$MODEL_NAME$$(sequelize, DataTypes).findByPk(req.params.id);
     console.log("$$TABLE_NAME$$ fetched");
     res.send({ msg: "$$TABLE_NAME$$ fetched", data: data });
   } catch (error) {
@@ -39,7 +41,7 @@ exports.findById = async (req, res, next) => {
 
 exports.create = async (req, res, next) => {
   try {
-    const data = await $$MODEL_NAME$$.create(req.body);
+    const data = await $$MODEL_NAME$$(sequelize, DataTypes).create(req.body);
     console.log("$$TABLE_NAME$$ created");
     res.send({
       msg: "$$TABLE_NAME$$ created",
@@ -53,7 +55,7 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
-    const data = await $$MODEL_NAME$$.update(req.body, {
+    const data = await $$MODEL_NAME$$(sequelize, DataTypes).update(req.body, {
       where: { id: req.params.id },
     });
     console.log("$$TABLE_NAME$$ updated");
@@ -69,7 +71,7 @@ exports.update = async (req, res, next) => {
 
 exports.destroy = async (req, res, next) => {
   try {
-    const data = await $$MODEL_NAME$$.destroy({
+    const data = await $$MODEL_NAME$$(sequelize, DataTypes).destroy({
       where: { id: req.params.id },
     });
     console.log("$$TABLE_NAME$$ deleted");
