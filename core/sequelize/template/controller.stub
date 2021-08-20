@@ -4,22 +4,27 @@ const { $$MODEL_NAME$$ } = require("../models");
 
 exports.findAll = async (req, res, next) => {
   try {
-    const data = await $$MODEL_NAME$$.findAll();
-    console.log("$$TABLE_NAME$$ fetched");
-    res.send({ msg: "$$TABLE_NAME$$ fetched", data: data });
-  } catch (error) {
-    console.log(error);
-    res.send(error);
-  }
-};
+    // pass in default limit and page if not defined
+    const limit = req.query.limit != undefined ? parseInt(req.query.limit) : 10;
+    const page = req.query.page != undefined ? parseInt(req.query.page) : 1;
 
-exports.findWhere = async (req, res, next) => {
-  try {
-    const data = await $$MODEL_NAME$$.findWhere({
+    // remove limit and page key from object req
+    delete req.query["limit"];
+    delete req.query["page"];
+
+    const data = await $$MODEL_NAME$$.findAndCountAll({
       where: req.query,
+      limit,
+      offset: limit * page - limit,
     });
-    console.log("$$TABLE_NAME$$ fetched");
-    res.send({ msg: "$$TABLE_NAME$$ fetched", data: data != null ? data : [] });
+
+    res.send({
+      msg: "$$TABLE_NAME$$ fetched",
+      data: data,
+      page: page,
+      limit: limit,
+      total_page: Math.ceil(data.count / limit),
+    });
   } catch (error) {
     console.log(error);
     res.send(error);
@@ -29,7 +34,6 @@ exports.findWhere = async (req, res, next) => {
 exports.findById = async (req, res, next) => {
   try {
     const data = await $$MODEL_NAME$$.findByPk(req.params.id);
-    console.log("$$TABLE_NAME$$ fetched");
     res.send({ msg: "$$TABLE_NAME$$ fetched", data: data });
   } catch (error) {
     console.log(error);
@@ -40,7 +44,6 @@ exports.findById = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     const data = await $$MODEL_NAME$$.create(req.body);
-    console.log("$$TABLE_NAME$$ created");
     res.send({
       msg: "$$TABLE_NAME$$ created",
       data: data,
@@ -56,7 +59,6 @@ exports.update = async (req, res, next) => {
     const data = await $$MODEL_NAME$$.update(req.body, {
       where: { id: req.params.id },
     });
-    console.log("$$TABLE_NAME$$ updated");
     res.send({
       msg: "$$TABLE_NAME$$ updated",
       data: data,
@@ -72,7 +74,6 @@ exports.destroy = async (req, res, next) => {
     const data = await $$MODEL_NAME$$.destroy({
       where: { id: req.params.id },
     });
-    console.log("$$TABLE_NAME$$ deleted");
     res.send({
       msg: "$$TABLE_NAME$$ deleted",
       data: data,
