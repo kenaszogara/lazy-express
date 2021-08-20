@@ -46,97 +46,53 @@ const GENERATE_SWAGGER_HELP = `${__dirname}/core/manual/generate/swagger/help.st
 
 // console.log(params);
 
+/**
+ * DATA TYPES
+ */
 const DATA_TYPES = {
+  ARRAY: "array",
+  BIGINT: "bigint",
+  BLOB: "blob",
+  BOOLEAN: "boolean",
+  CHAR: "char",
+  CIDR: "cidr",
+  CITEXT: "citext",
+  DATE: "date",
+  DATEONLY: "dateonly",
+  DECIMAL: "decimal",
+  DOUBLE: "double",
+  ENUM: "enum",
+  FLOAT: "float",
+  GEOGRAPHY: "geography",
+  GEOMETRY: "geometry",
+  HSTORE: "hstore",
+  INET: "inet",
   INTEGER: "integer",
+  JSON: "json",
+  JSONB: "jsonb",
+  JSONTYPE: "jsontype",
+  MACADDR: "macaddr",
+  MEDIUMINT: "mediumint",
+  NOW: "now",
+  NUMBER: "number",
+  RANGE: "range",
+  REAL: "real",
+  SMALLINT: "smallint",
   STRING: "string",
   TEXT: "text",
-  BOOLEAN: "boolean",
-  FLOAT: "float",
-  REAL: "real",
-  DECIMAL: "decimal",
-  JSON: "json",
+  TIME: "time",
+  TINYINT: "tinyint",
   UUID: "uuid",
-  DATE: "date",
-  ARRAY: "array",
-  OBJECT: "object",
-  NUMBER: "number",
+  VIRTUAL: "virtual",
+  // below is swagger setup
   EMAIL: "email",
   PASSWORD: "password",
   FILE: "file",
-  ENUM: "enum",
 };
-
-const COMMAND = {
-  LIST: [
-    "--help",
-    "init",
-    "generate",
-    "generate:model",
-    "generate:controller",
-    "generate:route",
-    "generate:swagger",
-  ],
-  HELP: "--help",
-  INIT: "init",
-  GENERATE: "generate",
-  GENERATE_MODEL: "generate:model",
-  GENERATE_CONTROLLER: "generate:controller",
-  GENERATE_ROUTE: "generate:route",
-  GENERATE_SWAGGER: "generate:swagger",
-};
-
-function main(c) {
-  const command = COMMAND.LIST.includes(c) ? c : "";
-
-  switch (command) {
-    case COMMAND.HELP:
-      showHelp(MANUAL_HELP);
-      break;
-
-    case COMMAND.INIT:
-      initializeProject();
-      break;
-
-    case COMMAND.GENERATE:
-      checkConfig();
-      console.log(`Generating Model/Migration/Controller/Route: ${PARAMS_2}`);
-      createSequelizeModel(PARAMS_2);
-      createSequelizMigration(PARAMS_2);
-      createSequelizeController(PARAMS_2);
-      createSequelizeRoute(PARAMS_2);
-      break;
-
-    case COMMAND.GENERATE_MODEL:
-      console.log(`Generating Model: ${PARAMS_2}`);
-      createSequelizeModel(PARAMS_2);
-      break;
-
-    case COMMAND.GENERATE_CONTROLLER:
-      console.log(`Generating Controller: ${PARAMS_2}`);
-      createSequelizeController(PARAMS_2);
-      break;
-
-    case COMMAND.GENERATE_ROUTE:
-      console.log(`Generating Route: ${PARAMS_2}`);
-      createSequelizeRoute(PARAMS_2);
-      break;
-
-    case COMMAND.GENERATE_SWAGGER:
-      console.log(`Generating Swagger Docs:`);
-      getSwaggerOptions();
-      break;
-
-    default:
-      console.log("ERROR: Unkown Command pls refer to --help");
-      showHelp(MANUAL_HELP);
-      exit();
-  }
-}
 
 /**
  * Init commands
  */
-
 const INIT_OPTIONS = {
   LIST: ["--help", "--no-swagger", "--no-route"],
   HELP: "--help",
@@ -320,7 +276,7 @@ function getSwaggerOptions() {
         break;
 
       case SWAGGER_OPTIONS.FIELDS:
-        _SWAGGER_FIELDS = params[index + 1];
+        _SWAGGER_FIELDS = params[index + 1].toString().split(",");
         break;
 
       case SWAGGER_OPTIONS.TABLE:
@@ -343,12 +299,8 @@ function getSwaggerOptions() {
   if (_SWAGGER_MODEL_NAME === undefined) throw Error("model name is a must");
   if (_SWAGGER_FIELDS === undefined) throw Error("fields is a must");
 
-  const route = _SWAGGER_ROUTE_NAME != undefined ? _SWAGGER_ROUTE_NAME : "";
-  const table = _SWAGGER_TABLE_NAME != undefined ? _SWAGGER_TABLE_NAME : "";
-  const file = _SWAGGER_FILE_NAME != undefined ? _SWAGGER_FILE_NAME : "";
-
-  generateSwaggerPaths(_SWAGGER_MODEL_NAME, route, table, file);
-  generateSwaggerSchemas(_SWAGGER_MODEL_NAME, _SWAGGER_FIELDS, file);
+  generateSwaggerPaths(_SWAGGER_MODEL_NAME);
+  generateSwaggerSchemas(_SWAGGER_MODEL_NAME, _SWAGGER_FIELDS);
 }
 
 function initializeSwagger() {
@@ -386,14 +338,26 @@ function initializeSwagger() {
   }
 }
 
-function generateSwaggerPaths(model, route = "", table = "", file = "") {
+function generateSwaggerPaths(model) {
   if (model === undefined) return console.log("error");
 
   try {
-    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
-    const tableName = table != "" ? table : model.toLowerCase();
-    const routeName = route != "" ? route : tableName;
-    const filename = file != "" ? file : `${modelName.toLowerCase()}.js`;
+    const modelName =
+      _SWAGGER_MODEL_NAME !== undefined
+        ? _SWAGGER_MODEL_NAME
+        : model.charAt(0).toUpperCase() + model.slice(1);
+    const tableName =
+      _SWAGGER_TABLE_NAME != undefined
+        ? _SWAGGER_TABLE_NAME
+        : model.toLowerCase();
+    const routeName =
+      _SWAGGER_ROUTE_NAME != undefined
+        ? _SWAGGER_ROUTE_NAME
+        : model.toLowerCase();
+    const filename =
+      _SWAGGER_FILE_NAME != undefined
+        ? `${_SWAGGER_FILE_NAME}.js`
+        : `${modelName.toLowerCase()}.js`;
     const destination = `${SWAGGER_DOC_PATHS_DESTINATION}/${filename}`;
 
     let data = fs.readFileSync(SWAGGER_DOC_PATHS_TEMPLATE, "utf8");
@@ -414,7 +378,9 @@ function generateSwaggerPaths(model, route = "", table = "", file = "") {
     mkdirIfNotExist(SWAGGER_DOC_PATHS_DESTINATION);
 
     if (fs.existsSync(destination) && !_SWAGGER_FORCE)
-      throw Error("File already exists. To overwrite use --force");
+      throw Error(
+        `Docs file in ${destination} already exists. To overwrite use --force`
+      );
 
     fs.writeFile(destination, data, function (err) {
       if (err) return console.log(err);
@@ -425,22 +391,27 @@ function generateSwaggerPaths(model, route = "", table = "", file = "") {
   }
 }
 
-function generateSwaggerSchemas(model, fields, file = "") {
+function generateSwaggerSchemas(model, fields) {
   if (model === undefined) return console.log("error");
 
   try {
-    const modelName = model.charAt(0).toUpperCase() + model.slice(1);
-    const filename = file != "" ? file : `${modelName.toLowerCase()}.js`;
+    const modelName =
+      _SWAGGER_MODEL_NAME != undefined
+        ? _SWAGGER_MODEL_NAME
+        : model.charAt(0).toUpperCase() + model.slice(1);
+    const filename =
+      _SWAGGER_FILE_NAME != undefined
+        ? `${_SWAGGER_FILE_NAME}.js`
+        : `${modelName.toLowerCase()}.js`;
     const destination = `${SWAGGER_DOC_SCHEMAS_DESTINATION}/${filename}`;
 
     let data = fs.readFileSync(SWAGGER_DOC_SCHEMAS_TEMPLATE, "utf8");
 
     data = data.replace("$$MODEL_NAME$$", modelName);
 
-    let schemaFieldsStr = "";
-    let schemaFields = fields.split(",");
+    let schemaFields = "";
 
-    schemaFields.forEach((item, index) => {
+    fields.forEach((item, index) => {
       let field = item.split(":");
       let name = field[0];
       let type = field[1];
@@ -458,7 +429,8 @@ function generateSwaggerSchemas(model, fields, file = "") {
           break;
 
         case DATA_TYPES.DATE:
-          dataTypes = `type: "${DATA_TYPES.DATE}",`;
+          dataTypes = `type: "${DATA_TYPES.STRING}",`;
+          format = `format: "${DATA_TYPES.DATE}",`;
           break;
 
         case DATA_TYPES.BOOLEAN:
@@ -485,14 +457,25 @@ function generateSwaggerSchemas(model, fields, file = "") {
           format = `format: "${DATA_TYPES.FLOAT}",`;
           break;
 
+        case DATA_TYPES.DOUBLE:
+          dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
+          format = `format: "${DATA_TYPES.DOUBLE}",`;
+          break;
+
+        case DATA_TYPES.DECIMAL:
+          dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
+          format = `format: "${DATA_TYPES.DECIMAL}",`;
+          break;
+
         default:
-          throw Error("Invalid data types");
+          dataTypes = `type: "string",`;
+          break;
       }
 
-      schemaFieldsStr == ""
-        ? (schemaFieldsStr = name + ": { " + dataTypes + " " + format + " },")
-        : (schemaFieldsStr =
-            schemaFieldsStr +
+      schemaFields == ""
+        ? (schemaFields = name + ": { " + dataTypes + " " + format + " },")
+        : (schemaFields =
+            schemaFields +
             "\n\t\t\t" +
             name +
             ": { " +
@@ -502,12 +485,14 @@ function generateSwaggerSchemas(model, fields, file = "") {
             " },");
     });
 
-    data = data.replace("$$SCHEMA_FIELDS$$", schemaFieldsStr);
+    data = data.replace("$$SCHEMA_FIELDS$$", schemaFields);
 
     // write model file
     mkdirIfNotExist(SWAGGER_DOC_SCHEMAS_DESTINATION);
     if (fs.existsSync(destination) && !_SWAGGER_FORCE)
-      throw Error("File already exists. To overwrite use --force");
+      throw Error(
+        `Doc file in ${destination} already exists. To overwrite use --force`
+      );
 
     fs.writeFile(destination, data, function (err) {
       if (err) return console.log(err);
@@ -641,16 +626,33 @@ function createMysqlRoute(a) {
  * Generator with Sequelize
  *
  */
-const MODEL_OPTIONS = {
-  LIST: ["--help", "-f", "-t"],
+const GENERATE_ALL_OPTIONS = {
+  LIST: ["--help", "-m", "-r", "-n", "-f", "-t", "--force"],
   HELP: "--help",
   FIELD: "-f",
   TABLE: "-t",
+  ROUTE: "-r",
+  MODEL: "-m",
+  FILE_NAME: "-n",
+  FORCE: "--force",
 };
 
+const MODEL_OPTIONS = {
+  LIST: ["--help", "-m", "-f", "-t", "-n", "--force"],
+  HELP: "--help",
+  MODEL: "-m",
+  FIELD: "-f",
+  TABLE: "-t",
+  FILE_NAME: "-n",
+  FORCE: "--force",
+};
+
+let MODEL_NAME;
 let MODEL_FIELD;
 let MIGRATION_FIELD;
-let TABLE_NAME;
+let MODEL_TABLE_NAME;
+let MODEL_FILE_NAME;
+let MODEL_FORCE = false;
 
 function getModelOptions() {
   // show help
@@ -669,73 +671,27 @@ function getModelOptions() {
     const option = MODEL_OPTIONS.LIST.includes(o) ? o : "";
 
     switch (option) {
+      case MODEL_OPTIONS.MODEL:
+        MODEL_NAME = params[index + 1].toString();
+        break;
+
       case MODEL_OPTIONS.FIELD:
-        let modelField = "";
-        let migrationField = "";
         const fields = params[index + 1].toString().split(",");
         // ["name:string", "number:integer", "date:date", "uuid:uuid", "boolean:boolean"]
 
-        fields.forEach((field) => {
-          let item = field.split(":");
-          let name = item[0];
-          let type = item[1];
-          let dataType;
-          let seqType;
-
-          switch (type) {
-            case DATA_TYPES.STRING:
-              dataType = "DataTypes.STRING";
-              seqType = "Sequelize.STRING";
-              break;
-
-            case DATA_TYPES.INTEGER:
-              dataType = "DataTypes.INTEGER";
-              seqType = "Sequelize.INTEGER";
-              break;
-
-            case DATA_TYPES.DATE:
-              dataType = "DataTypes.DATE";
-              seqType = "Sequelize.DATE";
-              break;
-
-            case DATA_TYPES.UUID:
-              dataType = "DataTypes.UUID";
-              seqType = "Sequelize.UUID";
-              break;
-
-            case DATA_TYPES.BOOLEAN:
-              dataType = "DataTypes.BOOLEAN";
-              seqType = "Sequelize.BOOLEAN";
-              break;
-
-            default:
-              throw Error("Missing datatype");
-          }
-
-          // concat
-          modelField == ""
-            ? (modelField = name + ": " + dataType + ", \n")
-            : (modelField =
-                modelField + "\t\t\t" + name + ": " + dataType + ", \n");
-
-          migrationField == ""
-            ? (migrationField = name + ": { type: " + seqType + " }, \n")
-            : (migrationField =
-                migrationField +
-                "\t\t\t" +
-                name +
-                ": { type: " +
-                seqType +
-                " }, \n");
-        });
-
-        MODEL_FIELD = modelField;
-        MIGRATION_FIELD = migrationField;
+        parseModelMigrationFields(fields);
         break;
 
       case MODEL_OPTIONS.TABLE:
-        const tableName = params[index + 1].toString();
-        TABLE_NAME = tableName;
+        MODEL_TABLE_NAME = params[index + 1].toString();
+        break;
+
+      case MODEL_OPTIONS.FILE_NAME:
+        MODEL_FILE_NAME = params[index + 1].toString();
+        break;
+
+      case MODEL_OPTIONS.FORCE:
+        MODEL_FORCE = true;
         break;
 
       default:
@@ -743,35 +699,193 @@ function getModelOptions() {
         break;
     }
   });
+
+  createSequelizeModel(MODEL_NAME);
+  createSequelizMigration(MODEL_NAME);
 }
 
-function createModelIndex() {
-  const target = `${MODEL_FOLDER_DESTINATION}/index.js`;
-  const data = fs.readFileSync(MODEL_INDEX_TEMPLATE, "utf8");
+function parseModelMigrationFields(fields) {
+  let modelField = "";
+  let migrationField = "";
 
-  if (!fs.existsSync(target)) {
-    fs.writeFile(target, data, function (err) {
-      if (err) return console.log(err);
-      console.log("Created: src > models > index");
-    });
-  }
+  fields.forEach((field) => {
+    let item = field.split(":");
+    let name = item[0];
+    let type = item[1];
+    let dataType;
+    let seqType;
+
+    switch (type) {
+      case DATA_TYPES.STRING:
+        dataType = "DataTypes.STRING";
+        seqType = "Sequelize.STRING";
+        break;
+
+      case DATA_TYPES.INTEGER:
+        dataType = "DataTypes.INTEGER";
+        seqType = "Sequelize.INTEGER";
+        break;
+
+      case DATA_TYPES.DATE:
+        dataType = "DataTypes.DATE";
+        seqType = "Sequelize.DATE";
+        break;
+
+      case DATA_TYPES.UUID:
+        dataType = "DataTypes.UUID";
+        seqType = "Sequelize.UUID";
+        break;
+
+      case DATA_TYPES.BOOLEAN:
+        dataType = "DataTypes.BOOLEAN";
+        seqType = "Sequelize.BOOLEAN";
+        break;
+
+      default:
+        throw Error("Missing datatype");
+    }
+
+    // concat
+    modelField == ""
+      ? (modelField = name + ": " + dataType + ", \n")
+      : (modelField = modelField + "\t\t\t" + name + ": " + dataType + ", \n");
+
+    migrationField == ""
+      ? (migrationField = name + ": { type: " + seqType + " }, \n")
+      : (migrationField =
+          migrationField + "\t\t\t" + name + ": { type: " + seqType + " }, \n");
+  });
+
+  MODEL_FIELD = modelField;
+  MIGRATION_FIELD = migrationField;
 }
 
-function createSequelizeModel(a) {
-  if (a == undefined) throw Error("required variable name");
+const CONTROLLER_OPTIONS = {
+  LIST: ["--help", "-m", "-n", "-t", "--force"],
+  HELP: "--help",
+  MODEL: "-m",
+  FILE_NAME: "-n",
+  TABLE_NAME: "-t",
+  FORCE: "--force",
+};
+
+let CONTROLLER_MODEL_NAME;
+let CONTROLLER_FILE_NAME;
+let CONTROLLER_TABLE_NAME;
+let CONTROLLER_FORCE = false;
+
+function getControllerOptions() {
+  // show help
+  params.forEach((o) => {
+    const option = CONTROLLER_OPTIONS.LIST.includes(o) ? o : "";
+    switch (option) {
+      case CONTROLLER_OPTIONS.HELP:
+        showHelp(GENERATE_HELP);
+        break;
+      default:
+        break;
+    }
+  });
+
+  params.forEach((o, index) => {
+    const option = CONTROLLER_OPTIONS.LIST.includes(o) ? o : "";
+
+    switch (option) {
+      case CONTROLLER_OPTIONS.MODEL:
+        CONTROLLER_MODEL_NAME = params[index + 1].toString();
+        break;
+
+      case CONTROLLER_OPTIONS.FILE_NAME:
+        CONTROLLER_FILE_NAME = params[index + 1].toString();
+        break;
+
+      case CONTROLLER_OPTIONS.TABLE_NAME:
+        CONTROLLER_TABLE_NAME = params[index + 1].toString();
+        break;
+
+      case CONTROLLER_OPTIONS.FORCE:
+        CONTROLLER_FORCE = true;
+        break;
+
+      default:
+        // console.log("no options");
+        break;
+    }
+  });
+
+  createSequelizeController(CONTROLLER_MODEL_NAME);
+}
+
+const ROUTE_OPTIONS = {
+  LIST: ["--help", "-r", "-c", "--force"],
+  HELP: "--help",
+  FILE_NAME: "-r",
+  CONTROLLER_NAME: "-c",
+  FORCE: "--force",
+};
+
+let ROUTE_FILE_NAME;
+let ROUTE_CONTROLLER_NAME;
+let ROUTE_FORCE = false;
+
+function getRouteOptions() {
+  // show help
+  params.forEach((o) => {
+    const option = ROUTE_OPTIONS.LIST.includes(o) ? o : "";
+    switch (option) {
+      case ROUTE_OPTIONS.HELP:
+        showHelp(GENERATE_HELP);
+        break;
+      default:
+        break;
+    }
+  });
+
+  params.forEach((o, index) => {
+    const option = ROUTE_OPTIONS.LIST.includes(o) ? o : "";
+
+    switch (option) {
+      case ROUTE_OPTIONS.FILE_NAME:
+        ROUTE_FILE_NAME = params[index + 1].toString();
+        break;
+
+      case ROUTE_OPTIONS.CONTROLLER_NAME:
+        ROUTE_CONTROLLER_NAME = params[index + 1].toString();
+        break;
+
+      case ROUTE_OPTIONS.FORCE:
+        ROUTE_FORCE = true;
+        break;
+
+      default:
+        // console.log("no options");
+        break;
+    }
+  });
+
+  createSequelizeRoute(ROUTE_FILE_NAME);
+}
+
+function createSequelizeModel(name) {
+  if (name == undefined) throw Error("required Model name");
 
   try {
     let output = "";
-    const modelName = a.charAt(0).toUpperCase() + a.slice(1);
-    const tableName = a.toLowerCase();
-    const filename = `${tableName}.js`;
+    const modelName =
+      MODEL_NAME != undefined
+        ? MODEL_NAME
+        : name.charAt(0).toUpperCase() + name.slice(1);
+    const tableName =
+      MODEL_TABLE_NAME != undefined ? MODEL_TABLE_NAME : name.toLowerCase();
+    const filename =
+      MODEL_FILE_NAME != undefined
+        ? `${MODEL_FILE_NAME}.js`
+        : `${name.toLowerCase()}.js`;
     const destination = `${MODEL_FOLDER_DESTINATION}/${filename}`;
 
     const data = fs.readFileSync(MODEL_TEMPLATE, "utf8");
 
     output = data;
-
-    getModelOptions();
 
     // model_name
     for (let i = 0; i < 4; i++) {
@@ -779,15 +893,15 @@ function createSequelizeModel(a) {
     }
 
     // table_name
-    output = output.replace(
-      "$$TABLE_NAME$$",
-      TABLE_NAME == undefined ? tableName : TABLE_NAME
-    );
+    output = output.replace("$$TABLE_NAME$$", tableName);
 
     // -f option (required)
     if (MODEL_FIELD == undefined) {
-      throw Error("field flag is required");
+      throw Error(
+        'Field value is required. Define field value with "-f" options'
+      );
     }
+
     output = output.replace("$$MODEL_FIELDS$$", MODEL_FIELD);
 
     // -a option
@@ -795,6 +909,12 @@ function createSequelizeModel(a) {
 
     // write model file
     mkdirIfNotExist(MODEL_FOLDER_DESTINATION);
+
+    if (fs.existsSync(destination) && !MODEL_FORCE)
+      throw Error(
+        `Model File at ${destination} already exists. To overwrite use --force`
+      );
+
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`Created: src > models > ${filename}`);
@@ -807,8 +927,8 @@ function createSequelizeModel(a) {
   }
 }
 
-function createSequelizMigration(a) {
-  if (a == undefined) throw Error("required variable name");
+function createSequelizMigration(name) {
+  if (name == undefined) throw Error("required Migration name");
 
   try {
     let output = "";
@@ -817,22 +937,21 @@ function createSequelizMigration(a) {
       .split(".")[0]
       .replace(/[^\d]/gi, "")
       .toString();
-    const tableName = a.toLowerCase();
-    const filename = `${date}-create-${tableName}.js`;
+    const tableName =
+      MODEL_TABLE_NAME != undefined ? MODEL_TABLE_NAME : name.toLowerCase();
+    const filename =
+      MODEL_FILE_NAME != undefined
+        ? `${MODEL_FILE_NAME}.js`
+        : `${date}-create-${name.toLowerCase()}.js`;
     const destination = `${MIGRATION_FOLDER_DESTINATION}/${filename}`;
 
     const data = fs.readFileSync(MIGRATION_TEMPLATE, "utf8");
 
     output = data;
 
-    getModelOptions();
-
     // table name
     for (let i = 0; i < 2; i++) {
-      output = output.replace(
-        "$$TABLE_NAME$$",
-        TABLE_NAME == undefined ? tableName : TABLE_NAME
-      );
+      output = output.replace("$$TABLE_NAME$$", tableName);
     }
 
     // -f option (required)
@@ -844,6 +963,12 @@ function createSequelizMigration(a) {
 
     // write model file
     mkdirIfNotExist(MIGRATION_FOLDER_DESTINATION);
+
+    if (fs.existsSync(destination) && !MODEL_FORCE)
+      throw Error(
+        `Migration File at ${destination} already exists. To overwrite use --force`
+      );
+
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`Created: src > migrations > ${filename}`);
@@ -856,20 +981,27 @@ function createSequelizMigration(a) {
   }
 }
 
-function createSequelizeController(a) {
-  if (a == undefined) throw Error("required variable name");
+function createSequelizeController(name) {
+  if (name == undefined) throw Error("required Controller name");
 
   try {
     let output = "";
-    const modelName = a.charAt(0).toUpperCase() + a.slice(1);
-    const tableName = a.toLowerCase();
-    const filename = `${tableName}.js`;
+    const modelName =
+      CONTROLLER_MODEL_NAME != undefined
+        ? CONTROLLER_MODEL_NAME
+        : name.charAt(0).toUpperCase() + name.slice(1);
+    const tableName =
+      CONTROLLER_TABLE_NAME != undefined
+        ? CONTROLLER_TABLE_NAME
+        : name.toLowerCase();
+    const filename =
+      CONTROLLER_FILE_NAME != undefined
+        ? `${CONTROLLER_FILE_NAME}.js`
+        : `${name.toLowerCase()}.js`;
     const destination = `${CONTROLLER_FOLDER_DESTINATION}/${filename}`;
 
     const data = fs.readFileSync(CONTROLLER_TEMPLATE, "utf8");
     output = data;
-
-    // import model
 
     // model_name
     // output = output.replace("$$MODEL_NAME$$", modelName);
@@ -885,6 +1017,12 @@ function createSequelizeController(a) {
 
     // write model file
     mkdirIfNotExist(CONTROLLER_FOLDER_DESTINATION);
+
+    if (fs.existsSync(destination) && !CONTROLLER_FORCE)
+      throw Error(
+        `Controller File at ${destination} already exists. To overwrite use --force`
+      );
+
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`Created: src > controllers > ${filename}`);
@@ -896,35 +1034,35 @@ function createSequelizeController(a) {
   }
 }
 
-function createSequelizeRoute(a) {
-  if (a == undefined) throw Error("required variable name");
+function createSequelizeRoute(name) {
+  if (name == undefined) throw Error("required Route name");
 
   try {
     let output = "";
-    const modelName = a.charAt(0).toUpperCase() + a.slice(1);
-    const tableName = a.toLowerCase();
-    const filename = `${tableName}.js`;
+    const controllerName =
+      ROUTE_CONTROLLER_NAME != undefined
+        ? ROUTE_CONTROLLER_NAME
+        : name.toLowerCase();
+    const filename =
+      ROUTE_FILE_NAME != undefined
+        ? `${ROUTE_FILE_NAME}.js`
+        : `${name.toLowerCase()}.js`;
     const destination = `${ROUTE_FOLDER_DESTINATION}/${filename}`;
 
     const data = fs.readFileSync(ROUTE_TEMPLATE, "utf8");
     output = data;
 
-    // import model
-
-    // model_name
-    // output = output.replace("$$MODEL_NAME$$", modelName);
-    for (let i = 0; i < 1; i++) {
-      output = output.replace("$$MODEL_NAME$$", modelName);
-    }
-
-    // table_name
-    // output = output.replace("$$TABLE_NAME$$", tableName);
-    for (let i = 0; i < 1; i++) {
-      output = output.replace("$$TABLE_NAME$$", tableName);
-    }
+    // controller_name
+    output = output.replace("$$CONTROLLER_NAME$$", controllerName);
 
     // write model file
     mkdirIfNotExist(ROUTE_FOLDER_DESTINATION);
+
+    if (fs.existsSync(destination) && !ROUTE_FORCE)
+      throw Error(
+        `Route File at ${destination} already exists. To overwrite use --force`
+      );
+
     fs.writeFile(destination, output, function (err) {
       if (err) return console.log(err);
       console.log(`Created: src > routes > ${filename}`);
@@ -933,6 +1071,151 @@ function createSequelizeRoute(a) {
     // console.log(output);
   } catch (err) {
     console.error(err);
+  }
+}
+
+/**
+ * GENERATE API COMMANDS
+ */
+const API_OPTIONS = {
+  LIST: ["--help", "-m", "-f", "-t", "-n", "-r", "--force"],
+  HELP: "--help",
+  MODEL: "-m", //required
+  FIELD: "-f", //required
+  TABLE_NAME: "-t",
+  FILE_NAME: "-n",
+  ROUTE_NAME: "-r",
+  FORCE: "--force",
+};
+
+let API_NAME;
+let API_FIELDS;
+
+function getAPIOptions() {
+  // show help
+  params.forEach((o) => {
+    const option = API_OPTIONS.LIST.includes(o) ? o : "";
+    switch (option) {
+      case API_OPTIONS.HELP:
+        showHelp(GENERATE_HELP);
+        break;
+      default:
+        break;
+    }
+  });
+
+  params.forEach((o, index) => {
+    const option = API_OPTIONS.LIST.includes(o) ? o : "";
+
+    switch (option) {
+      case API_OPTIONS.MODEL:
+        API_NAME = params[index + 1].toString();
+        break;
+
+      case API_OPTIONS.FIELD:
+        API_FIELDS = params[index + 1].toString().split(",");
+        parseModelMigrationFields(API_FIELDS);
+        break;
+
+      case API_OPTIONS.TABLE_NAME:
+        const tableName = params[index + 1].toString();
+        MODEL_TABLE_NAME = tableName;
+        _SWAGGER_TABLE_NAME = tableName;
+        CONTROLLER_TABLE_NAME = tableName;
+        break;
+
+      case API_OPTIONS.ROUTE_NAME:
+        const routeName = params[index + 1].toString();
+        _SWAGGER_ROUTE_NAME = routeName;
+        ROUTE_FILE_NAME = routeName;
+        console.log(routeName);
+        break;
+
+      case API_OPTIONS.FORCE:
+        MODEL_FORCE = true;
+        CONTROLLER_FORCE = true;
+        ROUTE_FORCE = true;
+        _SWAGGER_FORCE = true;
+        break;
+
+      default:
+        // console.log("no options");
+        break;
+    }
+  });
+
+  createSequelizeModel(API_NAME);
+  createSequelizMigration(API_NAME);
+  createSequelizeController(API_NAME);
+  createSequelizeRoute(API_NAME);
+  generateSwaggerPaths(API_NAME);
+  generateSwaggerSchemas(API_NAME, API_FIELDS);
+}
+
+/**
+ * MAIN COMMAND
+ */
+const COMMAND = {
+  LIST: [
+    "--help",
+    "init",
+    "generate:api",
+    "generate:model",
+    "generate:controller",
+    "generate:route",
+    "generate:swagger",
+  ],
+  HELP: "--help",
+  INIT: "init",
+  GENERATE_API: "generate:api",
+  GENERATE_MODEL: "generate:model",
+  GENERATE_CONTROLLER: "generate:controller",
+  GENERATE_ROUTE: "generate:route",
+  GENERATE_SWAGGER: "generate:swagger",
+};
+
+function main(c) {
+  const command = COMMAND.LIST.includes(c) ? c : "";
+
+  switch (command) {
+    case COMMAND.HELP:
+      showHelp(MANUAL_HELP);
+      break;
+
+    case COMMAND.INIT:
+      initializeProject();
+      break;
+
+    case COMMAND.GENERATE_API:
+      checkConfig();
+      console.log(`Generating Model/Migration/Controller/Route/SwaggerAPI:`);
+      getAPIOptions();
+      break;
+
+    case COMMAND.GENERATE_MODEL:
+      console.log(`Generating Model:`);
+      getModelOptions();
+      break;
+
+    case COMMAND.GENERATE_CONTROLLER:
+      console.log(`Generating Controller:`);
+      getControllerOptions();
+      break;
+
+    case COMMAND.GENERATE_ROUTE:
+      console.log(`Generating Route:`);
+      getRouteOptions();
+      break;
+
+    case COMMAND.GENERATE_SWAGGER:
+      console.log(`Generating Swagger Docs:`);
+      getSwaggerOptions();
+      break;
+
+    default:
+      console.log("ERROR: Unkown Command pls refer to --help");
+      showHelp(MANUAL_HELP);
+      exit();
   }
 }
 

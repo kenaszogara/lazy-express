@@ -6,7 +6,7 @@ const {
   update,
   destroy,
   findAll,
-} = require("./../controllers/$$TABLE_NAME$$");
+} = require("./../controllers/$$CONTROLLER_NAME$$");
 
 router.get("/", findAll);
 router.get("/:id", findById);
