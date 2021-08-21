@@ -21,6 +21,8 @@ const SWAGGER_DOC_FOLDER_DESTINATION = `${process.cwd()}/docs`;
 const SWAGGER_DOC_PATHS_DESTINATION = `${process.cwd()}/docs/paths`;
 const SWAGGER_DOC_SCHEMAS_DESTINATION = `${process.cwd()}/docs/schemas`;
 
+const AUTH_FOLDER_DESTINATION = `${process.cwd()}/auth`;
+
 // template
 const MIGRATION_TEMPLATE = `${__dirname}/core/sequelize/template/migration.stub`;
 const MODEL_TEMPLATE = `${__dirname}/core/sequelize/template/model.stub`;
@@ -37,6 +39,8 @@ const APP_USE_SWAGGER_TEMPLATE = `${__dirname}/core/swagger/template/app_use.stu
 const SWAGGER_INDEX_TEMPLATE = `${__dirname}/core/swagger/template/doc_index.stub`;
 const SWAGGER_DOC_PATHS_TEMPLATE = `${__dirname}/core/swagger/template/doc_paths.stub`;
 const SWAGGER_DOC_SCHEMAS_TEMPLATE = `${__dirname}/core/swagger/template/doc_schemas.stub`;
+
+const AUTH_TEMPLATE = `${__dirname}/core/auth/auth.stub`;
 
 // manual
 const MANUAL_HELP = `${__dirname}/core/manual/help.stub`;
@@ -227,6 +231,32 @@ function showHelp(target) {
   const data = fs.readFileSync(target, "utf8");
   console.log(data);
   exit();
+}
+
+/**
+ * Generator Auth
+ */
+
+function initializeAuth() {
+  mkdirIfNotExist(AUTH_FOLDER_DESTINATION);
+  const authTarget = `${AUTH_FOLDER_DESTINATION}/auth.js`;
+  const authData = fs.readFileSync(AUTH_TEMPLATE, "utf8");
+  if (!fs.existsSync(authTarget)) {
+    fs.writeFile(authTarget, authData, function (err) {
+      if (err) return console.log(err);
+      console.log("Initialize Auth: auth > auth.js");
+    });
+  }
+
+  const model = "users";
+  const fields = ["username:string", "email:string", "password:string"];
+  parseModelMigrationFields(fields);
+  createSequelizeModel(model);
+  createSequelizMigration(model);
+  createSequelizeController(model);
+  createSequelizeRoute(model);
+  generateSwaggerPaths(model, fields);
+  generateSwaggerSchemas(model, fields);
 }
 
 /**
@@ -1196,6 +1226,7 @@ function main(c) {
 
     case COMMAND.INIT:
       initializeProject();
+      initializeAuth();
       break;
 
     case COMMAND.GENERATE_API:

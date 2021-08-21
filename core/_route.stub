@@ -6,6 +6,23 @@ const fs = require("fs");
 const path = require("path");
 
 /**
+ * Login Authentication: we declare the login api to sign Users with token.
+ * check auth/auth.js to understand the simple token signing.
+ * To protect a route with token signing, simply add verifyToken function from auth/auth.js
+ * in the router function.
+ *
+ * Ex:
+ * -----------------------------------------------------------------
+ * const { verifyToken } = require("../auth/auth");
+ * router.post("/", verifyToken, create);
+ * -----------------------------------------------------------------
+ *
+ * If you don't want to use this auth login, just simply ignore it or comment the below declaration.
+ */
+const { login } = require("../auth/auth");
+router.post("/login", login);
+
+/**
  * Routes Declaration: The following function will import all generated route
  * from src/routes/*.js and require them to be used with route.use(), with the
  * file name as the name of the route.
