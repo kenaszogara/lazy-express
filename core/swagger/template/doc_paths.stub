@@ -4,9 +4,28 @@ module.exports = {
   "/$$ROUTE_NAME$$": {
     get: {
       tags: ["$$MODEL_NAME$$"], // operation's tag.
-      description: "Get all users", // operation's desc.
+      description: "Get all $$MODEL_NAME$$", // operation's desc.
       operationId: "get$$MODEL_NAME$$", // unique operation id.
-      parameters: [], // expected params.
+      parameters: [
+        {
+          in: "query",
+          name: "limit",
+          description: "The Limit number of items in a single query",
+          schema: {
+            type: "integer",
+            example: 10,
+          },
+        },
+        {
+          in: "query",
+          name: "page",
+          description: "The Page number from database",
+          schema: {
+            type: "integer",
+            example: 1,
+          },
+        },
+      ], // expected params.
       // expected responses
       responses: {
         // response code
@@ -28,6 +47,18 @@ module.exports = {
                       $ref: "#/definitions/$$MODEL_NAME$$",
                     },
                   },
+                  page: {
+                    type: "number",
+                    example: "1"
+                  },
+                  limit: {
+                    type: "number",
+                    example: "10"
+                  },
+                  total_page: {
+                    type: "number",
+                    example: "1"
+                  }
                 },
               },
             },
@@ -37,9 +68,21 @@ module.exports = {
     },
     post: {
       tags: ["$$MODEL_NAME$$"], // operation's tag.
-      description: "Create users", // operation's desc.
+      description: "Create $$MODEL_NAME$$", // operation's desc.
       operationId: "create$$MODEL_NAME$$", // unique operation id.
-      parameters: [], // expected params.
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                $$SCHEMA_FIELDS$$
+              },
+            },
+          },
+        },
+      },
       // expected responses
       responses: {
         // response code
@@ -69,12 +112,21 @@ module.exports = {
       },
     },
   },
-  "/$$ROUTE_NAME$$/{:id}": {
+  "/$$ROUTE_NAME$$/{id}": {
     get: {
       tags: ["$$MODEL_NAME$$"], // operation's tag.
-      description: "Get users by id", // operation's desc.
+      description: "Get $$MODEL_NAME$$ by id", // operation's desc.
       operationId: "get$$MODEL_NAME$$ById", // unique operation id.
-      parameters: [], // expected params.
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          description: "The id of the $$MODEL_NAME$$",
+          type: "integer",
+          example: 1,
+        },
+      ], // expected params.
       // expected responses
       responses: {
         // response code
@@ -105,9 +157,31 @@ module.exports = {
     },
     put: {
       tags: ["$$MODEL_NAME$$"], // operation's tag.
-      description: "Update users by id", // operation's desc.
+      description: "Update $$MODEL_NAME$$ by id", // operation's desc.
       operationId: "update$$MODEL_NAME$$ById", // unique operation id.
-      parameters: [], // expected params.
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          description: "The id of the $$MODEL_NAME$$",
+          type: "integer",
+          example: 1,
+        },
+      ], // expected params.
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                $$SCHEMA_FIELDS$$
+              },
+            },
+          },
+        },
+      },
       // expected responses
       responses: {
         // response code
@@ -138,9 +212,18 @@ module.exports = {
     },
     delete: {
       tags: ["$$MODEL_NAME$$"], // operation's tag.
-      description: "Delete users by id", // operation's desc.
-      operationId: "deleteUsersById", // unique operation id.
-      parameters: [], // expected params.
+      description: "Delete $$MODEL_NAME$$ by id", // operation's desc.
+      operationId: "delete$$MODEL_NAME$$ById", // unique operation id.
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          description: "The id of the $$MODEL_NAME$$",
+          type: "integer",
+          example: 1,
+        },
+      ], // expected params.
       // expected responses
       responses: {
         // response code

@@ -20,7 +20,7 @@ exports.findAll = async (req, res, next) => {
 
     res.send({
       msg: "$$TABLE_NAME$$ fetched",
-      data: data,
+      data: data.rows,
       page: page,
       limit: limit,
       total_page: Math.ceil(data.count / limit),

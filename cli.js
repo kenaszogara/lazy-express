@@ -299,7 +299,7 @@ function getSwaggerOptions() {
   if (_SWAGGER_MODEL_NAME === undefined) throw Error("model name is a must");
   if (_SWAGGER_FIELDS === undefined) throw Error("fields is a must");
 
-  generateSwaggerPaths(_SWAGGER_MODEL_NAME);
+  generateSwaggerPaths(_SWAGGER_MODEL_NAME, _SWAGGER_FIELDS);
   generateSwaggerSchemas(_SWAGGER_MODEL_NAME, _SWAGGER_FIELDS);
 }
 
@@ -338,7 +338,87 @@ function initializeSwagger() {
   }
 }
 
-function generateSwaggerPaths(model) {
+function parseSwaggerFields(fields) {
+  let schemaFields = "";
+
+  fields.forEach((item, index) => {
+    let field = item.split(":");
+    let name = field[0];
+    let type = field[1];
+    let dataTypes;
+    let format = "";
+
+    switch (type) {
+      case DATA_TYPES.INTEGER:
+        dataTypes = `type: "${DATA_TYPES.INTEGER}",`;
+        format = 'format: "int64",';
+        break;
+
+      case DATA_TYPES.STRING:
+        dataTypes = `type: "${DATA_TYPES.STRING}",`;
+        break;
+
+      case DATA_TYPES.DATE:
+        dataTypes = `type: "${DATA_TYPES.STRING}",`;
+        format = `format: "${DATA_TYPES.DATE}",`;
+        break;
+
+      case DATA_TYPES.BOOLEAN:
+        dataTypes = `type: "${DATA_TYPES.BOOLEAN}",`;
+        break;
+
+      case DATA_TYPES.EMAIL:
+        dataTypes = `type: "${DATA_TYPES.STRING}",`;
+        format = `format: "${DATA_TYPES.EMAIL}",`;
+        break;
+
+      case DATA_TYPES.PASSWORD:
+        dataTypes = `type: "${DATA_TYPES.STRING}",`;
+        format = `format: "${DATA_TYPES.PASSWORD}",`;
+        break;
+
+      case DATA_TYPES.FILE:
+        dataTypes = `type: "${DATA_TYPES.STRING}",`;
+        format = 'format: "byte",';
+        break;
+
+      case DATA_TYPES.FLOAT:
+        dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
+        format = `format: "${DATA_TYPES.FLOAT}",`;
+        break;
+
+      case DATA_TYPES.DOUBLE:
+        dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
+        format = `format: "${DATA_TYPES.DOUBLE}",`;
+        break;
+
+      case DATA_TYPES.DECIMAL:
+        dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
+        format = `format: "${DATA_TYPES.DECIMAL}",`;
+        break;
+
+      default:
+        dataTypes = `type: "string",`;
+        break;
+    }
+
+    schemaFields == ""
+      ? (schemaFields = name + ": { " + dataTypes + " " + format + " },")
+      : (schemaFields =
+          schemaFields +
+          "\n\t\t\t" +
+          name +
+          ": { " +
+          dataTypes +
+          " " +
+          format +
+          " },");
+  });
+
+  return schemaFields;
+}
+
+function generateSwaggerPaths(model, fields) {
   if (model === undefined) return console.log("error");
 
   try {
@@ -366,12 +446,18 @@ function generateSwaggerPaths(model) {
       data = data.replace("$$ROUTE_NAME$$", routeName);
     }
 
-    for (let i = 0; i < 18; i++) {
+    for (let i = 0; i < 27; i++) {
       data = data.replace("$$MODEL_NAME$$", modelName);
     }
 
     for (let i = 0; i < 5; i++) {
       data = data.replace("$$TABLE_NAME$$", tableName);
+    }
+
+    let schemaFields = parseSwaggerFields(fields);
+
+    for (let i = 0; i < 2; i++) {
+      data = data.replace("$$SCHEMA_FIELDS$$", schemaFields);
     }
 
     // write model file
@@ -409,81 +495,7 @@ function generateSwaggerSchemas(model, fields) {
 
     data = data.replace("$$MODEL_NAME$$", modelName);
 
-    let schemaFields = "";
-
-    fields.forEach((item, index) => {
-      let field = item.split(":");
-      let name = field[0];
-      let type = field[1];
-      let dataTypes;
-      let format = "";
-
-      switch (type) {
-        case DATA_TYPES.INTEGER:
-          dataTypes = `type: "${DATA_TYPES.INTEGER}",`;
-          format = 'format: "int64",';
-          break;
-
-        case DATA_TYPES.STRING:
-          dataTypes = `type: "${DATA_TYPES.STRING}",`;
-          break;
-
-        case DATA_TYPES.DATE:
-          dataTypes = `type: "${DATA_TYPES.STRING}",`;
-          format = `format: "${DATA_TYPES.DATE}",`;
-          break;
-
-        case DATA_TYPES.BOOLEAN:
-          dataTypes = `type: "${DATA_TYPES.BOOLEAN}",`;
-          break;
-
-        case DATA_TYPES.EMAIL:
-          dataTypes = `type: "${DATA_TYPES.STRING}",`;
-          format = `format: "${DATA_TYPES.EMAIL}",`;
-          break;
-
-        case DATA_TYPES.PASSWORD:
-          dataTypes = `type: "${DATA_TYPES.STRING}",`;
-          format = `format: "${DATA_TYPES.PASSWORD}",`;
-          break;
-
-        case DATA_TYPES.FILE:
-          dataTypes = `type: "${DATA_TYPES.STRING}",`;
-          format = 'format: "byte",';
-          break;
-
-        case DATA_TYPES.FLOAT:
-          dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
-          format = `format: "${DATA_TYPES.FLOAT}",`;
-          break;
-
-        case DATA_TYPES.DOUBLE:
-          dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
-          format = `format: "${DATA_TYPES.DOUBLE}",`;
-          break;
-
-        case DATA_TYPES.DECIMAL:
-          dataTypes = `type: "${DATA_TYPES.NUMBER}",`;
-          format = `format: "${DATA_TYPES.DECIMAL}",`;
-          break;
-
-        default:
-          dataTypes = `type: "string",`;
-          break;
-      }
-
-      schemaFields == ""
-        ? (schemaFields = name + ": { " + dataTypes + " " + format + " },")
-        : (schemaFields =
-            schemaFields +
-            "\n\t\t\t" +
-            name +
-            ": { " +
-            dataTypes +
-            " " +
-            format +
-            " },");
-    });
+    let schemaFields = parseSwaggerFields(fields);
 
     data = data.replace("$$SCHEMA_FIELDS$$", schemaFields);
 
@@ -1148,7 +1160,7 @@ function getAPIOptions() {
   createSequelizMigration(API_NAME);
   createSequelizeController(API_NAME);
   createSequelizeRoute(API_NAME);
-  generateSwaggerPaths(API_NAME);
+  generateSwaggerPaths(API_NAME, API_FIELDS);
   generateSwaggerSchemas(API_NAME, API_FIELDS);
 }
 
