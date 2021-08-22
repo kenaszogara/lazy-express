@@ -1,0 +1,15 @@
+VYNL CLI
+
+vynl generate:controller -m [model name] [options]
+
+Description:
+  Generate only Controller file
+
+Required:
+  -m                      Model name for the Schema and Paths Tags
+
+Options:
+  -n                      Optional filename for Controller. Default to modelName.toLower() as filename
+  -t                      Optional tablename. Default to modelName.toLower() as tablename
+  --force                 Force replace generated files
+  --help                  Show this help  

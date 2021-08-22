@@ -1,10 +1,14 @@
 VYNL CLI
 
-vynl [command]
+vynl [command] [options]
 
 Commands:
   vynl init                             Initializes project
-  vynl generate                         Run vynl generator
+  vynl generate:api                     Generates Model/Migration/Controller/Route/SwaggerDoc
+  vynl generate:model                   Generates Model/Migration
+  vynl generate:controller              Generates Controllers
+  vynl generate:route                   Generates Routes
+  vynl generate:swagger                 Generates Swagger Documentation
 
 Options:
-  --help      Show help  
+  --help      Show help

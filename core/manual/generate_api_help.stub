@@ -1,0 +1,17 @@
+VYNL CLI
+
+vynl generate:api -m [model name] -f [model and schema fields] [options]
+
+Description:
+  Generate Model,Migration,Controller,Route and SwaggerDoc files
+
+Required:
+  -m                      Model name for the Schema and Paths Tags
+  -f                      Schema fields ex: <name>:<types>
+
+Options:
+  -n                      Optional filename for all generated files. Default to modelName.toLower() as filename 
+  -t                      Optional tablename. Default to modelName.toLower() as tablename 
+  -r                      Optional route name. Default to modelName.toLower() as route name
+  --force                 Force replace all generated files
+  --help                  Show this help  

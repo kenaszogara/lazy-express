@@ -1,11 +1,11 @@
 {
   "name": "vynl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "VYNL a boilerplate generator for MVC project architecture using ExpressJS with Sequelize",
   "keywords": [
     "vynl"
   ],
-  "main": "index.js",
+  "main": "cli.js",
   "author": "Kenas Zogara",
   "license": "MIT",
   "repository": {

@@ -17,7 +17,6 @@ const CONTROLLER_FOLDER_DESTINATION = `${process.cwd()}/controllers`;
 const ROUTE_FOLDER_DESTINATION = `${process.cwd()}/routes`;
 const MIGRATION_FOLDER_DESTINATION = `${process.cwd()}/migrations`;
 
-const SWAGGER_DOC_FOLDER_DESTINATION = `${process.cwd()}/docs`;
 const SWAGGER_DOC_PATHS_DESTINATION = `${process.cwd()}/docs/paths`;
 const SWAGGER_DOC_SCHEMAS_DESTINATION = `${process.cwd()}/docs/schemas`;
 
@@ -43,10 +42,13 @@ const SWAGGER_DOC_SCHEMAS_TEMPLATE = `${__dirname}/core/swagger/template/doc_sch
 const AUTH_TEMPLATE = `${__dirname}/core/auth/auth.stub`;
 
 // manual
-const MANUAL_HELP = `${__dirname}/core/manual/help.stub`;
 const INIT_HELP = `${__dirname}/core/manual/help.stub`;
-const GENERATE_HELP = `${__dirname}/core/manual/generate/help.stub`;
-const GENERATE_SWAGGER_HELP = `${__dirname}/core/manual/generate/swagger/help.stub`;
+const MANUAL_HELP = `${__dirname}/core/manual/help.stub`;
+const GENERATE_HELP = `${__dirname}/core/manual/generate_api_help.stub`;
+const GENERATE_MODEL_HELP = `${__dirname}/core/manual/generate_model_help.stub`;
+const GENERATE_ROUTE_HELP = `${__dirname}/core/manual/generate_route_help.stub`;
+const GENERATE_SWAGGER_HELP = `${__dirname}/core/manual/generate_swagger_help.stub`;
+const GENERATE_CONTROLLER_HELP = `${__dirname}/core/manual/generate_controller_help.stub`;
 
 // console.log(params);
 
@@ -328,6 +330,8 @@ function getSwaggerOptions() {
 
   if (_SWAGGER_MODEL_NAME === undefined) throw Error("model name is a must");
   if (_SWAGGER_FIELDS === undefined) throw Error("fields is a must");
+
+  console.log(`Generating Swagger Docs:`);
 
   generateSwaggerPaths(_SWAGGER_MODEL_NAME, _SWAGGER_FIELDS);
   generateSwaggerSchemas(_SWAGGER_MODEL_NAME, _SWAGGER_FIELDS);
@@ -668,16 +672,6 @@ function createMysqlRoute(a) {
  * Generator with Sequelize
  *
  */
-const GENERATE_ALL_OPTIONS = {
-  LIST: ["--help", "-m", "-r", "-n", "-f", "-t", "--force"],
-  HELP: "--help",
-  FIELD: "-f",
-  TABLE: "-t",
-  ROUTE: "-r",
-  MODEL: "-m",
-  FILE_NAME: "-n",
-  FORCE: "--force",
-};
 
 const MODEL_OPTIONS = {
   LIST: ["--help", "-m", "-f", "-t", "-n", "--force"],
@@ -702,7 +696,7 @@ function getModelOptions() {
     const option = MODEL_OPTIONS.LIST.includes(o) ? o : "";
     switch (option) {
       case MODEL_OPTIONS.HELP:
-        showHelp(GENERATE_HELP);
+        showHelp(GENERATE_MODEL_HELP);
         break;
       default:
         break;
@@ -741,6 +735,8 @@ function getModelOptions() {
         break;
     }
   });
+
+  console.log(`Generating Model:`);
 
   createSequelizeModel(MODEL_NAME);
   createSequelizMigration(MODEL_NAME);
@@ -789,13 +785,13 @@ function parseModelMigrationFields(fields) {
 
     // concat
     modelField == ""
-      ? (modelField = name + ": " + dataType + ", \n")
-      : (modelField = modelField + "\t\t\t" + name + ": " + dataType + ", \n");
+      ? (modelField = name + ": " + dataType + ",")
+      : (modelField = modelField + "\n\t\t\t" + name + ": " + dataType + ",");
 
     migrationField == ""
-      ? (migrationField = name + ": { type: " + seqType + " }, \n")
+      ? (migrationField = name + ": { type: " + seqType + " },")
       : (migrationField =
-          migrationField + "\t\t\t" + name + ": { type: " + seqType + " }, \n");
+          migrationField + "\n\t\t\t" + name + ": { type: " + seqType + " },");
   });
 
   MODEL_FIELD = modelField;
@@ -822,7 +818,7 @@ function getControllerOptions() {
     const option = CONTROLLER_OPTIONS.LIST.includes(o) ? o : "";
     switch (option) {
       case CONTROLLER_OPTIONS.HELP:
-        showHelp(GENERATE_HELP);
+        showHelp(GENERATE_CONTROLLER_HELP);
         break;
       default:
         break;
@@ -855,6 +851,8 @@ function getControllerOptions() {
     }
   });
 
+  console.log(`Generating Controller:`);
+
   createSequelizeController(CONTROLLER_MODEL_NAME);
 }
 
@@ -876,7 +874,7 @@ function getRouteOptions() {
     const option = ROUTE_OPTIONS.LIST.includes(o) ? o : "";
     switch (option) {
       case ROUTE_OPTIONS.HELP:
-        showHelp(GENERATE_HELP);
+        showHelp(GENERATE_ROUTE_HELP);
         break;
       default:
         break;
@@ -904,6 +902,8 @@ function getRouteOptions() {
         break;
     }
   });
+
+  console.log(`Generating Route:`);
 
   createSequelizeRoute(ROUTE_FILE_NAME);
 }
@@ -1186,6 +1186,8 @@ function getAPIOptions() {
     }
   });
 
+  console.log(`Generating Model/Migration/Controller/Route/SwaggerAPI:`);
+
   createSequelizeModel(API_NAME);
   createSequelizMigration(API_NAME);
   createSequelizeController(API_NAME);
@@ -1231,27 +1233,22 @@ function main(c) {
 
     case COMMAND.GENERATE_API:
       checkConfig();
-      console.log(`Generating Model/Migration/Controller/Route/SwaggerAPI:`);
       getAPIOptions();
       break;
 
     case COMMAND.GENERATE_MODEL:
-      console.log(`Generating Model:`);
       getModelOptions();
       break;
 
     case COMMAND.GENERATE_CONTROLLER:
-      console.log(`Generating Controller:`);
       getControllerOptions();
       break;
 
     case COMMAND.GENERATE_ROUTE:
-      console.log(`Generating Route:`);
       getRouteOptions();
       break;
 
     case COMMAND.GENERATE_SWAGGER:
-      console.log(`Generating Swagger Docs:`);
       getSwaggerOptions();
       break;
 
