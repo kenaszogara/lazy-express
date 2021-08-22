@@ -1,7 +1,7 @@
 {
   "name": "vynl",
-  "version": "0.0.2",
-  "description": "VYNL a boilerplate generator for MVC project architecture using ExpressJS with Sequelize",
+  "version": "0.1.0",
+  "description": "VYNL a boilerplate generator for Express.js projects using MVC architecture",
   "keywords": [
     "vynl"
   ],
