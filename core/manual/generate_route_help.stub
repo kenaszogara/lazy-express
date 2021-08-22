@@ -1,0 +1,14 @@
+VYNL CLI
+
+vynl generate:route -r [route name] [options]
+
+Description:
+  Generate only Route file
+
+Required:
+  -r                      Route name, also being used as the filename
+
+Options:
+  -c                      Optional Controller filename for this route. Default to routeName.toLower() 
+  --force                 Force replace generated files
+  --help                  Show this help

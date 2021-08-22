@@ -1,0 +1,253 @@
+"use strict";
+
+module.exports = {
+  "/$$ROUTE_NAME$$": {
+    get: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Get all $$MODEL_NAME$$", // operation's desc.
+      operationId: "get$$MODEL_NAME$$", // unique operation id.
+      parameters: [
+        {
+          in: "query",
+          name: "limit",
+          description: "The Limit number of items in a single query",
+          schema: {
+            type: "integer",
+            example: 10,
+          },
+        },
+        {
+          in: "query",
+          name: "page",
+          description: "The Page number from database",
+          schema: {
+            type: "integer",
+            example: 1,
+          },
+        },
+      ], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ fetched", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ fetched",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                  page: {
+                    type: "number",
+                    example: "1"
+                  },
+                  limit: {
+                    type: "number",
+                    example: "10"
+                  },
+                  total_page: {
+                    type: "number",
+                    example: "1"
+                  }
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    post: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Create $$MODEL_NAME$$", // operation's desc.
+      operationId: "create$$MODEL_NAME$$", // unique operation id.
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                $$SCHEMA_FIELDS$$
+              },
+            },
+          },
+        },
+      },
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ created", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ created",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+  "/$$ROUTE_NAME$$/{id}": {
+    get: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Get $$MODEL_NAME$$ by id", // operation's desc.
+      operationId: "get$$MODEL_NAME$$ById", // unique operation id.
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          description: "The id of the $$MODEL_NAME$$",
+          type: "integer",
+          example: 1,
+        },
+      ], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ fetched", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ fetched",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    put: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Update $$MODEL_NAME$$ by id", // operation's desc.
+      operationId: "update$$MODEL_NAME$$ById", // unique operation id.
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          description: "The id of the $$MODEL_NAME$$",
+          type: "integer",
+          example: 1,
+        },
+      ], // expected params.
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                $$SCHEMA_FIELDS$$
+              },
+            },
+          },
+        },
+      },
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ updated", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ updated",
+                  },
+                  data: {
+                    type: "array",
+                    items: {
+                      $ref: "#/definitions/$$MODEL_NAME$$",
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    delete: {
+      tags: ["$$MODEL_NAME$$"], // operation's tag.
+      description: "Delete $$MODEL_NAME$$ by id", // operation's desc.
+      operationId: "delete$$MODEL_NAME$$ById", // unique operation id.
+      parameters: [
+        {
+          in: "path",
+          name: "id",
+          required: true,
+          description: "The id of the $$MODEL_NAME$$",
+          type: "integer",
+          example: 1,
+        },
+      ], // expected params.
+      // expected responses
+      responses: {
+        // response code
+        200: {
+          description: "$$MODEL_NAME$$ deleted", // response desc.
+          content: {
+            // content-type
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  msg: {
+                    type: "string",
+                    example: "$$TABLE_NAME$$ deleted",
+                  },
+                  data: {
+                    type: "integer",
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};

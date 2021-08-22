@@ -1,0 +1,17 @@
+VYNL CLI
+
+vynl generate:swagger -m [model name] -f [schema fields] [options]
+
+Description:
+  Generate only SwaggerDoc files
+
+Required:
+  -m                      Model name for the Schema and Paths Tags
+  -f                      Schema fields ex: <name>:<types>
+
+Options:
+  -n                      Optional filename for both Schema and Path if not set will use modelName.toLower() as filename 
+  -t                      Optional tablename. if not set will use modelName.toLower() as tablename 
+  -r                      Optional route name. If not set will use modelName.toLower() as route name
+  --force                 Force replace generated files
+  --help                  Show this help  
